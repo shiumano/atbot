@@ -12,9 +12,23 @@ def set_client():
     client = main.client
 
 #便利かなぁと作った関数
-def p_check(member,channel,permission):
-    bool = member.id == owner or member.permissions_in(channel) >= permission
-    return bool
+def p_check(member,channel,permission,level=None):
+    if member.id == owner or member.permissions_in(channel) >= permission:
+        return True
+    
+    with open('user_data.json') as file:
+        user_dict = json.loads(file.read())
+    if level:
+        a = user_dict.get(str(message.author.id))
+        if a:
+            b = a.get(str(message.channel.category_id))
+            if b:
+                if user_dict[str(message.channel.category_id)] > level:
+                    (user_dict[str(message.author.id)]
+                              [0]
+                              [str(message.channel.category_id)]) -= level
+                    return True
+    return False
 
 async def no_embed(message):
     global p_test
@@ -68,7 +82,7 @@ async def commands(message):
             u_b = 'BOT'
         else:
             u_b = 'ユーザー'
-        with open('user_data.json',mode='r') as file:
+        with open('user_data.json') as file:
             user_dict = json.loads(file.read())
         data = discord.Embed(title=f'{u_b}情報',colour=colour)
         data.add_field(name='名前',value=user)
@@ -107,7 +121,7 @@ async def commands(message):
                         if user_dict[str(user.id)]:
                             user_dict[str(user.id)][1] = msg.content
                         else:
-                            user_dict[str(user.id)] = [0,msg.content]
+                            user_dict[str(user.id)] = [{},msg.content]
                         with open('user_data.json',mode='w') as file:
                             user_json = json.dumps(user_dict,ensure_ascii=False, indent=2)
                             file.write(user_json)
@@ -131,8 +145,30 @@ async def commands(message):
         except discord.errors.Forbidden:
             await no_embed(message)
 
+    if message.content == '@say':
+        with open('user_data.json') as file:
+            user_dict = json.loads(file.read())
+         
+        can = False
+        a = user_dict.get(str(message.author.id))
+        if a:
+            b = a.get(str(message.channel.category_id))
+            if b:
+                if user_dict[str(message.channel.category_id)] > 1200:
+                    can = True
+        if can:
+            await message.channel.send(message.content[5:])
+            (user_dict[str(message.author.id)]
+                      [0]
+                      [str(message.channel.category_id)]) -= 1000
+            with open('user_data.json',mode='w') as file:
+                user_json = json.dumps(user_dict,ensure_asci=False,indent=2)
+                file.write(user_json)
+        else:
+            await message.channel.send('自分で言えよアホ')
+            
     if message.content == '@clear':
-        if p_check(message.author,message.channel,discord.Permissions().update(manage_messages=True)):
+        if p_check(message.author,message.channel,discord.Permissions().update(manage_messages=True),5000):
             kakunin = await message.channel.send('削除しますか？')
             await kakunin.add_reaction('⭕')
             await kakunin.add_reaction('❌')
