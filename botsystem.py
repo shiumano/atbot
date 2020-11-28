@@ -74,7 +74,8 @@ async def commands(message):
         data.add_field(name='名前',value=user)
         data.add_field(name='作成日時',value=timedelta.utc2jst(user.created_at).strftime('%Y/%m/%d %H:%M:%S'))
         if user_dict.get(str(user.id)):
-            data.add_field(name='メモ',value=user_dict[str(user.id)])
+            if user_dict[user.id][1]:
+                data.add_field(name='メモ',value=user_dict[str(user.id)][1])
         data.add_field(name='アイコン',value='\u200c')
         data.set_image(url=user.avatar_url)
         mes = None
@@ -103,7 +104,10 @@ async def commands(message):
                         await mes.clear_reaction('🖋️')
                         await message.channel.send('タイムアウトしました。')
                     else:
-                        user_dict[str(user.id)] = msg.content
+                        if user_dict[str(user.id)]:
+                            user_dict[str(user.id)][1] = msg.content
+                        else:
+                            user_dict[str(user.id)] = [0,msg.content]
                         with open('user_data.json',mode='w') as file:
                             user_json = json.dumps(user_dict,ensure_ascii=False, indent=2)
                             file.write(user_json)
