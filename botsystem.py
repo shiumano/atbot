@@ -203,7 +203,7 @@ async def commands(message):
 
     if message.content == '@ping':
         global ping
-        mes = await message.channel.send('Testing now...')
+        mes = await message.channel.send('テスト中……')
         ping.append(mes)
 
     now = time.time()
