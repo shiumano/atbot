@@ -88,7 +88,7 @@ async def commands(message):
         data.add_field(name='名前',value=user)
         data.add_field(name='作成日時',value=timedelta.utc2jst(user.created_at).strftime('%Y/%m/%d %H:%M:%S'))
         if user_dict.get(str(user.id)):
-            if user_dict[user.id][1]:
+            if user_dict[str(user.id)][1]:
                 data.add_field(name='メモ',value=user_dict[str(user.id)][1])
         data.add_field(name='アイコン',value='\u200c')
         data.set_image(url=user.avatar_url)
