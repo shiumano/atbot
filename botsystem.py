@@ -132,7 +132,7 @@ async def commands(message):
         id = int(message.content[15:])
         server = main.client.get_guild(id)
         owner = await main.client.fetch_user(server.owner_id)
-        data = discord.Embed(title='サーバー情報',colour=0x00bfff)
+        data = discord.Embed(title='サーバー情報',colour=owner.colour)
         data.add_field(name='名前',value=server.name)
         data.add_field(name='オーナー',value=f'{owner}({owner.id})')
         data.add_field(name='ブーストレベル',value=server.premium_tier)
