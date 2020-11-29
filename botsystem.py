@@ -1,5 +1,5 @@
 import __main__ as main
-import discord, asyncio, json, time, subprocess, timedelta
+import discord, asyncio, json, random, subprocess, time, timedelta
 import multiprocessing as mp
 
 owner = 728289161563340881
@@ -15,7 +15,7 @@ def set_client():
 def p_check(member,channel,permission,level=None):
     if member.id == owner or member.permissions_in(channel) >= permission:
         return True
-    
+
     with open('user_data.json') as file:
         user_dict = json.loads(file.read())
     if level:
@@ -30,14 +30,31 @@ def p_check(member,channel,permission,level=None):
                     return True
     return False
 
+def greet(time,a,b,c,d,e,f,g):
+    if time < 4:
+       message = a
+    elif time < 7:
+       message = b
+    elif time < 10:
+       message = c
+    elif time < 12:
+       message = d
+    elif time < 17:
+       message = e
+    elif time < 20:
+       message = f
+    else:
+       message = g
+    return message
+
 async def no_embed(message):
     global p_test
     if message in p_test:
         await message.channel.send('謎だぁ')
-        dev = await main.client.fetch_user(owner)
+        dev = await client.fetch_user(owner)
         await dev.send(f'謎現象：{message.content}')
         p_test.remove(message)
-    g_owner = await main.client.fetch_user(message.guild.owner_id)
+    g_owner = await client.fetch_user(message.guild.owner_id)
     try:
         await message.channel.send('おや？これは埋め込みリンク使えないパターンか？？')
     except discord.errors.Forbidden:
@@ -61,12 +78,12 @@ def screenfetch():
 
 #メイン
 async def commands(message):
-    if message.content == '@test':
-        await message.channel.send('@reply')
+    #if message.content == '@test':
+    #    await message.channel.send('@reply')
 
     if message.content.startswith('@search user'):
         id = int(message.content[13:])
-        user = await main.client.fetch_user(id)
+        user = await client.fetch_user(id)
         colour = str(user.default_avatar)
         if colour == 'blurple':
             colour = discord.Colour.blurple()
@@ -130,8 +147,8 @@ async def commands(message):
 
     if message.content.startswith('@search server'):
         id = int(message.content[15:])
-        server = main.client.get_guild(id)
-        owner = await main.client.fetch_user(server.owner_id)
+        server = client.get_guild(id)
+        owner = await client.fetch_user(server.owner_id)
         data = discord.Embed(title='サーバー情報',colour=owner.colour)
         data.add_field(name='名前',value=server.name)
         data.add_field(name='オーナー',value=f'{owner}({owner.id})')
@@ -148,7 +165,7 @@ async def commands(message):
     if message.content == '@say':
         with open('user_data.json') as file:
             user_dict = json.loads(file.read())
-         
+
         can = False
         a = user_dict.get(str(message.author.id))
         if a:
@@ -166,7 +183,7 @@ async def commands(message):
                 file.write(user_json)
         else:
             await message.channel.send('自分で言えよアホ')
-            
+
     if message.content == '@clear':
         if p_check(message.author,message.channel,discord.Permissions().update(manage_messages=True),5000):
             kakunin = await message.channel.send('削除しますか？')
@@ -214,3 +231,19 @@ async def commands(message):
         await message.edit(content=f'Ping : {delta[:6]}ms\n'
                                 f'Latency : {latency[:6]}ms')
         ping.remove(message)
+
+async def zatzudan(message):
+    mestime = timedelta.utc2jst(message.created_at)
+    luck = random.randint(1,10)
+    if luck < 5:
+        if 'おはよう' in message.content:
+            send = greet(mestime.hour,
+                         'ド深夜',
+                         '眠ぃ',
+                         'おはよー',
+                         'おそよう',
+                         '昼過ぎてるぞ………',
+                         'もう夜なんだが………',
+                         '今日1日何してた')
+            await message.channel.send(send)
+

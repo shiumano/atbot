@@ -1,8 +1,11 @@
 import discord, importlib, os
 import botsystem
 
-
-token = os.environ['DISCORD_BOT_TOKEN']
+try:
+    token = os.environ['DISCORD_BOT_TOKEN']
+except KeyError:
+    with open('/storage/emulated/0/DiscordBOT/token') as file:
+        token = file.read()
 
 client = discord.Client()
 botsystem.set_client()
@@ -20,4 +23,5 @@ async def on_message(message):
         except Exception as e:
             await message.channel.send(f'Not reloaded : {e}')
     await botsystem.commands(message)
+    await botsystem.zatzudan(message)
 client.run(token)
