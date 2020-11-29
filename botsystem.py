@@ -61,8 +61,8 @@ def screenfetch():
 
 #メイン
 async def commands(message):
-    #if message.content == '@test':
-    #    await message.channel.send('@reply')
+    if message.content == '@test':
+        await message.channel.send('@reply')
 
     if message.content.startswith('@search user'):
         id = int(message.content[13:])
