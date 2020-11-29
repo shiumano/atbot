@@ -77,11 +77,11 @@ def screenfetch():
     result = subprocess.run('screenfetch',capture_output=True).stdout.decode()
 
 #メイン
-async def commands(message):
-    #if message.content == '@test':
+async def commands(message,pf):
+    #if message.content == f'{pf}test':
     #    await message.channel.send('@reply')
 
-    if message.content.startswith('@search user'):
+    if message.content.startswith(f'{pf}search user'):
         id = int(message.content[13:])
         user = await client.fetch_user(id)
         colour = str(user.default_avatar)
@@ -145,7 +145,7 @@ async def commands(message):
                         await message.channel.send('メモを設定しました。')
 
 
-    if message.content.startswith('@search server'):
+    if message.content.startswith(f'{pf}search server'):
         id = int(message.content[15:])
         server = client.get_guild(id)
         owner = await client.fetch_user(server.owner_id)
@@ -162,7 +162,7 @@ async def commands(message):
         except discord.errors.Forbidden:
             await no_embed(message)
 
-    if message.content.startswith('@say'):
+    if message.content.startswith(f'{pf}say'):
         with open('user_data.json') as file:
             user_dict = json.loads(file.read())
 
@@ -184,7 +184,7 @@ async def commands(message):
         else:
             await message.channel.send('自分で言えよアホ')
 
-    if message.content == '@clear':
+    if message.content == f'{pf}clear':
         if p_check(message.author,message.channel,discord.Permissions().update(manage_messages=True),5000):
             kakunin = await message.channel.send('削除しますか？')
             await kakunin.add_reaction('⭕')
@@ -208,17 +208,17 @@ async def commands(message):
                         await message.channel.purge(limit=10000)
                         ask = False
 
-    if message.content == '@help':
+    if message.content == f'{pf}help':
         embed=discord.Embed(title='コマンド',colour=0x00bfff)
-        embed.add_field(name='@search [user|server] <ID>',value='サーバー情報|ユーザー情報を表示します。')
-        embed.add_field(name='@clear',value='チャンネル内のメッセージを一括削除します。\n[メッセージの管理]の権限が必要です。')
-        embed.add_field(name='@ping',value='BOTの応答速度を計測します。')
+        embed.add_field(name=f'{pf}search [user|server] <ID>',value='サーバー情報|ユーザー情報を表示します。')
+        embed.add_field(name=f'{pf}clear',value='チャンネル内のメッセージを一括削除します。\n[メッセージの管理]の権限が必要です。')
+        embed.add_field(name=f'{pf}ping',value='BOTの応答速度を計測します。')
         try:
             await message.channel.send(embed=embed)
         except discord.errors.Forbidden:
             await no_embed(message)
 
-    if message.content == '@ping':
+    if message.content == f'{pf}ping':
         global ping
         mes = await message.channel.send('テスト中……')
         ping.append(mes)

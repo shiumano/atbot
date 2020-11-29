@@ -3,11 +3,11 @@ import botsystem
 
 try:
     token = os.environ['DISCORD_BOT_TOKEN']
-    local = False
+    pf = '@'
 except KeyError:
     with open('/storage/emulated/0/DiscordBOT/token') as file:
         token = file.read()
-    local = True
+    pf = 'Test@'
 
 client = discord.Client()
 botsystem.set_client()
@@ -18,7 +18,7 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
-    if message.content == '@reload' and local:
+    if message.content == '@reload' and pf == 'Test@':
         try:
             importlib.reload(botsystem)
             await message.channel.send('Reloaded.')
