@@ -13,22 +13,43 @@ def set_client():
 
 #便利かなぁと作った関数
 def p_check(member,channel,permission,level=None):
-    if member.id == owner or member.permissions_in(channel) >= permission:
-        return True
+    if type(channel) == discord.TextChannel:
+        if member.id == owner or member.permissions_in(channel) >= permission:
+            return True
 
+        with open('user_data.json') as file:
+            user_dict = json.loads(file.read())
+        if level:
+            return leveling(member,chanel,level*-1)
+    return False
+
+def leveling(user,ch,level):
+    bool = False
+    first = True
+    write = False
+    if type(ch) == discord.DMChannel:
+        return False
     with open('user_data.json') as file:
         user_dict = json.loads(file.read())
-    if level:
-        a = user_dict.get(str(message.author.id))
-        if a:
-            b = a.get(str(message.channel.category_id))
-            if b:
-                if user_dict[str(message.channel.category_id)] > level:
-                    (user_dict[str(message.author.id)]
-                              [0]
-                              [str(message.channel.category_id)]) -= level
-                    return True
-    return False
+    a = user_dict.get(str(user.id))
+    if a:
+        b = a[0].get(str(ch.category_id))
+        if b:
+            if a[0][str(ch.category_id)] > level:
+                (user_dict[str(user.id)]
+                          [0]
+                          [str(ch.category_id)]) += level
+                first = False
+                bool = True
+                write = True
+    if level > 0 and first:
+        user_dict[str(user.id)] = [{str(ch.category_id):level},None]
+        write = True
+    if write:
+        with open('user_data.json',mode='w') as file:
+            user_json = json.dumps(user_dict,ensure_ascii=False,indent=2)
+            file.write(user_json)
+    return bool
 
 def greet(time,a,b,c,d,e,f,g):
     if time < 4:
@@ -78,11 +99,12 @@ def screenfetch():
 
 #メイン
 async def commands(message,pf):
+    lpf = len(pf)
     #if message.content == f'{pf}test':
     #    await message.channel.send('@reply')
 
     if message.content.startswith(f'{pf}search user'):
-        id = int(message.content[13:])
+        id = int(message.content[12+lpf:])
         user = await client.fetch_user(id)
         colour = str(user.default_avatar)
         if colour == 'blurple':
@@ -146,7 +168,7 @@ async def commands(message,pf):
 
 
     if message.content.startswith(f'{pf}search server'):
-        id = int(message.content[15:])
+        id = int(message.content[14+lpf:])
         server = client.get_guild(id)
         owner = await client.fetch_user(server.owner_id)
         data = discord.Embed(title='サーバー情報',colour=owner.colour)
@@ -163,29 +185,13 @@ async def commands(message,pf):
             await no_embed(message)
 
     if message.content.startswith(f'{pf}say'):
-        with open('user_data.json') as file:
-            user_dict = json.loads(file.read())
-
-        can = False
-        a = user_dict.get(str(message.author.id))
-        if a:
-            b = a[0].get(str(message.channel.category_id))
-            if b:
-                if user_dict[str(message.channel.category_id)] > 1200:
-                    can = True
-        if can:
-            await message.channel.send(message.content[5:])
-            (user_dict[str(message.author.id)]
-                      [0]
-                      [str(message.channel.category_id)]) -= 1000
-            with open('user_data.json',mode='w') as file:
-                user_json = json.dumps(user_dict,ensure_asci=False,indent=2)
-                file.write(user_json)
+        if leveling(message.author,message.channel,1000):
+            await message.channel.send(message.content[4+lpf:])
         else:
             await message.channel.send('自分で言えよアホ')
 
     if message.content == f'{pf}clear':
-        if p_check(message.author,message.channel,discord.Permissions().update(manage_messages=True),5000):
+        if p_check(message.author,message.channel,discord.Permissions().update(manage_messages=True),15000):
             kakunin = await message.channel.send('削除しますか？')
             await kakunin.add_reaction('⭕')
             await kakunin.add_reaction('❌')
@@ -205,7 +211,7 @@ async def commands(message,pf):
                         await kakunin.edit(content='削除しますか？\n取り消しました')
                         ask = False
                     if str(reaction) == '⭕':
-                        await message.channel.purge(limit=10000)
+                        await message.channel.purge(limit=50000)
                         ask = False
 
     if message.content == f'{pf}help':
@@ -233,6 +239,7 @@ async def commands(message,pf):
         ping.remove(message)
 
 async def zatzudan(message):
+    leveling(message.author,message.channel,len(message.content)/2)
     mestime = timedelta.utc2jst(message.created_at)
     luck = random.randint(1,10)
     if luck < 5:
@@ -246,4 +253,5 @@ async def zatzudan(message):
                          'もう夜なんだが………',
                          '今日1日何してた')
             await message.channel.send(send)
+
 
