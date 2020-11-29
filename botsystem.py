@@ -162,14 +162,14 @@ async def commands(message):
         except discord.errors.Forbidden:
             await no_embed(message)
 
-    if message.content == '@say':
+    if message.content.startswith('@say'):
         with open('user_data.json') as file:
             user_dict = json.loads(file.read())
 
         can = False
         a = user_dict.get(str(message.author.id))
         if a:
-            b = a.get(str(message.channel.category_id))
+            b = a[0].get(str(message.channel.category_id))
             if b:
                 if user_dict[str(message.channel.category_id)] > 1200:
                     can = True
