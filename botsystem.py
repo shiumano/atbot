@@ -242,20 +242,40 @@ async def commands(message,pf):
         ping.remove(message)
 
 async def zatzudan(message):
-    leveling(message.author,message.channel,len(message.content)/2)
-    mestime = timedelta.utc2jst(message.created_at)
-    luck = random.randint(1,10)
-    if luck < 5:
-        if 'おはよう' in message.content:
-            send = greet(mestime.hour,
-                         'ド深夜',
-                         '眠ぃ',
-                         'おはよー',
-                         'おそよう',
-                         '昼過ぎてるぞ………',
-                         'もう夜なんだが………',
-                         '今日1日何してた')
-            await message.channel.send(send)
-
+    if message.author != client.user:
+        leveling(message.author,message.channel,len(message.content)/2)
+        mestime = timedelta.utc2jst(message.created_at)
+        luck = random.randint(1,10)
+        if luck < 5:
+            if 'おはよう' in message.content:
+                send = greet(mestime.hour,
+                             'ド深夜',
+                             '眠ぃ',
+                             'おはよー',
+                             'おそよう',
+                             '昼過ぎてるぞ………',
+                             'もう夜なんだが………',
+                             '今日1日何してた')
+                await message.channel.send(send)
+            elif 'こんにちは' in message.content:
+                send = greet(mestime.hour,
+                             '生活リズムがよくないと思うんだ',
+                             'んみゃ？こんちゃっす………',
+                             'こんにちは',
+                             'Good Afternoon',
+                             'こんにちは………\nふぁぁ(あくび)',
+                             '夜だぜ',
+                             'お  や  す  み')
+                await message.channel.send(send)
+            elif 'こんばんは' in message.content:
+                send = greet(mestime.hour,
+                             '寝よう。な？',
+                             '今かよ',
+                             '徹夜かい？',
+                             f'今{mestime.hour}時だけど………え？()',
+                             'おひるです。',
+                             '早寝っすねー\nいいと思いますよ',
+                             'おやすみー')
+                await message.channel.send(send)
 
 print('読み込み完了')
