@@ -18,7 +18,7 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
-    if message.content == '@reload' and pf == 'Test@':
+    if message.content == f'{pf}reload' and pf == 'Test@':
         try:
             importlib.reload(botsystem)
             await message.channel.send('Reloaded.')
