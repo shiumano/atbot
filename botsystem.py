@@ -25,7 +25,6 @@ def p_check(member,channel,permission,level=None):
 
 def leveling(user,ch,level):
     bool = False
-    first = True
     write = False
     if type(ch) == discord.DMChannel:
         return False
@@ -39,12 +38,16 @@ def leveling(user,ch,level):
                 (user_dict[str(user.id)]
                           [0]
                           [str(ch.category_id)]) += level
-                first = False
                 bool = True
                 write = True
-    if level > 0 and first:
-        user_dict[str(user.id)] = [{str(ch.category_id):level},None]
-        write = True
+        if level > 0:
+            if user_dict.get(str(user.id)):
+                (user_dict[str(user.id)]
+                          [0]
+                          [str(ch.category_id)]) = level
+            else:
+                user_dict[str(user.id)] = [{str(ch.category_id):level},None]
+            write = True
     if write:
         with open('user_data.json',mode='w') as file:
             user_json = json.dumps(user_dict,ensure_ascii=False,indent=2)
@@ -255,3 +258,4 @@ async def zatzudan(message):
             await message.channel.send(send)
 
 
+print('読み込み完了')
