@@ -187,6 +187,13 @@ async def commands(message,pf):
         except discord.errors.Forbidden:
             await no_embed(message)
 
+    if message.content.startswith(f'{pf}timer'):
+        set_time = int(message.content[6+lpf:])
+        await message.channel.send(f'タイマーを{set_time}秒に設定しました')
+        async with message.channel.typing():
+            await asyncio.sleep(set_time)
+        await message.channel.send(f'{set_time}秒経過しました')
+
     if message.content.startswith(f'{pf}say'):
         if leveling(message.author,message.channel,1000):
             await message.channel.send(message.content[4+lpf:])
