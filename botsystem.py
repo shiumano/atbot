@@ -26,7 +26,7 @@ def p_check(member,channel,permission,level=None):
 def leveling(user,ch,level):
     bool = False
     write = False
-    if type(ch) == discord.DMChannel:
+    if type(ch) in (discord.DMChannel,discord.GroupChannel):
         return False
     with open('user_data.json') as file:
         user_dict = json.loads(file.read())
