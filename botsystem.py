@@ -226,6 +226,7 @@ async def commands(message,pf):
         else:
             count = int(message.content[6+lpf:])-1
         if p_check(message.author,message.channel,discord.Permissions().update(manage_messages=True),15000):
+            kakunin = await message.channel.send('プレビューの読み込み中……')
             messages = await message.channel.history(limit=50000).flatten()
             if len(messages) < count:
                 preview = messages[-1]
@@ -233,7 +234,6 @@ async def commands(message,pf):
             else:
                 preview = messages[count]
             embed = discord.Embed(title=f'{count+1}個前のメッセージ',description=preview.content,colour=0x00bfff)
-            kakunin = await message.channel.send('プレビューの読み込み中………')
             await kakunin.edit(content='削除しますか？',embed=embed)
             for button in ('⭕','❌','⬇️','⬆️'):
                 await kakunin.add_reaction(button)
