@@ -5,7 +5,7 @@ try:
     token = os.environ['DISCORD_BOT_TOKEN']
     pf = '@'
 except KeyError:
-    with open('/storage/emulated/0/DiscordBOT/token') as file:
+    with open('/storage/emulated/0/token') as file:
         token = file.read()
     pf = 'Test@'
 
