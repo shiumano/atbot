@@ -11,7 +11,7 @@ def set_client():
     global client
     client = main.client
 
-#便利かなぁと作った関数
+#便利かなぁと作った
 def p_check(member,channel,permission,level=None):
     if type(channel) == discord.TextChannel:
         if member.id == owner or member.permissions_in(channel) >= permission:
@@ -55,21 +55,41 @@ def leveling(user,ch,level):
     return bool
 
 def greet(time,a,b,c,d,e,f,g):
-    if time < 4:
+    if time <= 4:
        message = a
-    elif time < 7:
+    elif time <= 7:
        message = b
-    elif time < 10:
+    elif time <= 10:
        message = c
-    elif time < 12:
+    elif time <= 12:
        message = d
-    elif time < 17:
+    elif time <= 17:
        message = e
-    elif time < 20:
+    elif time <= 20:
        message = f
     else:
        message = g
     return message
+
+#あるなら教えてクレメンス
+class any:
+    def __init__(self,*args):
+        self.list = list(args)
+    def rem(self,value):
+        self.list.remove(value)
+    def add(self,value):
+        self.list.append(value)
+
+    def __eq__(self,other):
+        for value in self.list:
+           if value == other:
+               return True
+        return False
+    def __ne__(self,other):
+        for value in self.list:
+            if value == other:
+                return False
+        return True
 
 async def no_embed(message):
     global p_test
@@ -200,29 +220,67 @@ async def commands(message,pf):
         else:
             await message.channel.send('自分で言えよアホ')
 
-    if message.content == f'{pf}clear':
+    if message.content.startswith(f'{pf}clear'):
+        if message.content == f'{pf}clear':
+            count = 49999
+        else:
+            count = int(message.content[6+lpf:])-1
         if p_check(message.author,message.channel,discord.Permissions().update(manage_messages=True),15000):
-            kakunin = await message.channel.send('削除しますか？')
-            await kakunin.add_reaction('⭕')
-            await kakunin.add_reaction('❌')
+            messages = await message.channel.history(limit=50000).flatten()
+            if len(messages) < count:
+                preview = messages[-1]
+                count = len(messages)-1
+            else:
+                preview = messages[count]
+            embed = discord.Embed(title=f'{count+1}個前のメッセージ',description=preview.content,colour=0x00bfff)
+            kakunin = await message.channel.send('削除しますか？',embed=embed)
+            for button in ('⭕','❌','⬇️','⬆️'):
+                await kakunin.add_reaction(button)
             def check(reaction, user):
                 return user == message.author
 
             ask = True
+            timeout = True
             while ask:
+                if timeout:
+                    wait = 20.0
+                else:
+                    wait = 60.0
                 try:
-                    reaction, user = await client.wait_for('reaction_add', timeout=10.0, check=check)
+                    reaction, user = await client.wait_for('reaction_add', timeout=wait, check=check)
 
                 except:
-                    await kakunin.edit(content='削除しますか？\n取り消しました。')
+                    await kakunin.edit(content='削除しますか？\n取り消しました。',embed=None)
+                    try:
+                        await message.clear_reactions()
+                    except:
+                        pass
                     ask = False
                 else:
                     if str(reaction) == '❌':
-                        await kakunin.edit(content='削除しますか？\n取り消しました')
+                        await kakunin.edit(content='削除しますか？\n取り消しました',embed=None)
+                        try:
+                            await message.clear_reactions()
+                        except:
+                            pass
                         ask = False
                     if str(reaction) == '⭕':
-                        await message.channel.purge(limit=50000)
+                        await message.channel.purge(limit=count+2)
                         ask = False
+                    if str(reaction) in ('⬇️','⬆️'):
+                        if str(reaction) == '⬇️' and count != 0:
+                            count -= 1
+                        elif str(reaction) == '⬆️' and count+1 != len(messages):
+                            count += 1
+                        preview = messages[count]
+                        embed.title = f'{count+1}個前のメッセージ'
+                        embed.description = preview.content
+                        await kakunin.edit(embed=embed)
+                        try:
+                            await reaction.remove(user)
+                        except:
+                            pass
+                        timeout = False
 
     if message.content == f'{pf}help':
         embed=discord.Embed(title='コマンド',colour=0x00bfff)
@@ -284,5 +342,15 @@ async def zatzudan(message):
                              '早寝っすねー\nいいと思いますよ',
                              'おやすみー')
                 await message.channel.send(send)
+
+    if message.content.endswith('?') and len(message.content) < 20 and len(message.content.splitlines()) == 1:
+        def check(msg):
+            return msg.channel == message.channel
+        try:
+            mes = await client.wait_for('message',check=check,timeout=30)
+            if len(mes.content) < 10:
+                await message.channel.send(f'{pf}death {mes.content}')
+        except:
+            pass
 
 print('読み込み完了')
