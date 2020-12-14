@@ -223,19 +223,26 @@ async def commands(message,pf):
     if message.content.startswith(f'{pf}clear'):
         if message.content == f'{pf}clear':
             count = 49999
+            collect = False
+            buttons = ('⭕','❌')
         else:
             count = int(message.content[6+lpf:])-1
+            collect = True
+            buttons = ('⭕','❌','⬇️','⬆️')
         if p_check(message.author,message.channel,discord.Permissions().update(manage_messages=True),15000):
-            kakunin = await message.channel.send('プレビューの読み込み中……')
-            messages = await message.channel.history(limit=50000).flatten()
-            if len(messages) < count:
-                preview = messages[-1]
-                count = len(messages)-1
+            if len(buttons) == 4:
+                kakunin = await message.channel.send('プレビューの読み込み中……')
+                messages = await message.channel.history(limit=count + 200).flatten()
+                if len(messages) < count:
+                    preview = messages[-1]
+                    count = len(messages)-1
+                else:
+                    preview = messages[count]
+                embed = discord.Embed(title=f'{count+1}個前のメッセージ',description=preview.content,colour=0x00bfff)
+                await kakunin.edit(content='削除しますか？',embed=embed)
             else:
-                preview = messages[count]
-            embed = discord.Embed(title=f'{count+1}個前のメッセージ',description=preview.content,colour=0x00bfff)
-            await kakunin.edit(content='削除しますか？',embed=embed)
-            for button in ('⭕','❌','⬇️','⬆️'):
+                kakunin = await message.channel.send('チャンネル内のメッセージを消去しますか？')
+            for button in buttons:
                 await kakunin.add_reaction(button)
             def check(reaction, user):
                 return user == message.author
