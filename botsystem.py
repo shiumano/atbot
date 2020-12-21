@@ -232,7 +232,8 @@ async def commands(message,pf):
         if p_check(message.author,message.channel,discord.Permissions().update(manage_messages=True),15000):
             if len(buttons) == 4:
                 kakunin = await message.channel.send('プレビューの読み込み中……')
-                messages = await message.channel.history(limit=count + 200).flatten()
+                messages = await message.channel.history(limit=count + 201).flatten()
+                messages.remove(kakunin)
                 if len(messages) < count:
                     preview = messages[-1]
                     count = len(messages)-1
