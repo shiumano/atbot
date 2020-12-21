@@ -18,12 +18,16 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
+    if message.author.discriminator == '0000':
+        return
+
     if message.content == f'{pf}reload' and pf == 'Test@':
         try:
             importlib.reload(botsystem)
             await message.channel.send('Reloaded.')
         except Exception as e:
             await message.channel.send(f'Not reloaded : {e}')
+
     await botsystem.commands(message,pf)
     await botsystem.zatzudan(message)
 client.run(token)
