@@ -340,7 +340,7 @@ async def zatzudan(message):
                              '夜だぜ',
                              'お  や  す  み')
                 await message.channel.send(send)
-            elif 'こんばんは' in message.content:
+            elif 'おやすみ' in message.content:
                 send = greet(mestime.hour,
                              '寝よう。な？',
                              '今かよ',
