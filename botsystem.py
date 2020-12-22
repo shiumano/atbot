@@ -1,11 +1,16 @@
 import __main__ as main
-import discord, asyncio, json, random, subprocess, time, timedelta
+import discord, asyncio, json, re, random, subprocess, time, timedelta
 import multiprocessing as mp
 
 owner = 728289161563340881
 
 ping = []
 p_test = []
+
+regex = re.compile('\d+')
+def search_id(text):
+    match = regex.findall(text)
+    return [int(i) for i in match]
 
 def set_client():
     global client
@@ -163,7 +168,7 @@ async def commands(message,pf):
             if message.author == user:
                 await mes.add_reaction('🖋️')
                 def check(reaction, author):
-                    return author == user and str(reaction.emoji) == '🖋️'
+                    return author == user and str(reaction.emoji) == '🖋️' and reaction.message == mes
 
                 try:
                     reaction, user = await client.wait_for('reaction_add',timeout=10.0, check=check)
@@ -207,6 +212,22 @@ async def commands(message,pf):
         except discord.errors.Forbidden:
             await no_embed(message)
 
+    if message.content.startswith(f'{pf}emoji'):
+        if message.content == f'{pf}emoji':
+            mes = await message.channel.send('リアクションを追加してください')
+            def check(reaction,user):
+                return user == message.author and reaction.message == mes
+            reaction, user = await client.wait_for('reaction_add',check=check)
+            await mes.edit(content=reaction.emoji.url)
+
+        else:
+            emojis = [await message.guild.fetch_emoji(id) for id in search_id(message.content[6+lpf:])]
+            send = ''
+            for emoji in emojis:
+                send += str(emoji.url) + '\n'
+        await message.channel.send(send)
+
+
     if message.content.startswith(f'{pf}timer'):
         set_time = int(message.content[6+lpf:])
         await message.channel.send(f'タイマーを{set_time}秒に設定しました')
@@ -246,7 +267,7 @@ async def commands(message,pf):
             for button in buttons:
                 await kakunin.add_reaction(button)
             def check(reaction, user):
-                return user == message.author
+                return user == message.author and reaction.message == kakunin
 
             ask = True
             timeout = True
@@ -352,7 +373,7 @@ async def zatzudan(message):
                              'おやすみー')
                 await message.channel.send(send)
 
-    if message.content.endswith('?') and len(message.content) < 20 and len(message.content.splitlines()) == 1:
+    if message.content.endswith('NULL') and len(message.content) < 20 and len(message.content.splitlines()) == 1:
         def check(msg):
             return msg.channel == message.channel
         try:
