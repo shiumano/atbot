@@ -221,10 +221,9 @@ async def commands(message,pf):
             await mes.edit(content=reaction.emoji.url)
 
         else:
-            emojis = [await message.guild.fetch_emoji(id) for id in search_id(message.content[6+lpf:])]
             send = ''
-            for emoji in emojis:
-                send += str(emoji.url) + '\n'
+            for id in search_id(message.content[6+lpf:]):
+                send += f'https://cdn.discordapp.com/emojis/{id}.png\n'
         await message.channel.send(send)
 
 
