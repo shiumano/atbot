@@ -16,11 +16,11 @@ def set_client():
     global client
     client = main.client
 
-help = discord.Embed(title='コマンド',colour=0x00bfff)
-help.add_field(name=f'{pf}emoji ({emoji})',value='絵文字のURLを取得します。')
-help.add_field(name=f'{pf}search [user|server] <ID>',value='サーバー情報|ユーザー情報を表示します。\n自分の情報を出すとメモを追加できます。')
-help.add_field(name=f'{pf}clear (count)',value='チャンネル内のメッセージを一括削除します。\n[メッセージの管理]の権限が必要です。')
-help.add_field(name=f'{pf}ping',value='BOTの応答速度を計測します。')
+    help = discord.Embed(title='コマンド',colour=0x00bfff)
+    help.add_field(name=f'{pf}emoji ({emoji})',value='絵文字のURLを取得します。')
+    help.add_field(name=f'{pf}search [user|server] <ID>',value='サーバー情報|ユーザー情報を表示します。\n自分の情報を出すとメモを追加できます。')
+    help.add_field(name=f'{pf}clear (count)',value='チャンネル内のメッセージを一括削除します。\n[メッセージの管理]の権限が必要です。')
+    help.add_field(name=f'{pf}ping',value='BOTの応答速度を計測します。')
 
 #便利かなぁと作った
 def p_check(member,channel,permission,level=None):
