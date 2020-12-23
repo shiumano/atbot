@@ -16,6 +16,12 @@ def set_client():
     global client
     client = main.client
 
+help = discord.Embed(title='コマンド',colour=0x00bfff)
+help.add_field(name=f'{pf}emoji ({emoji})',value='絵文字のURLを取得します。')
+help.add_field(name=f'{pf}search [user|server] <ID>',value='サーバー情報|ユーザー情報を表示します。\n自分の情報を出すとメモを追加できます。')
+help.add_field(name=f'{pf}clear (count)',value='チャンネル内のメッセージを一括削除します。\n[メッセージの管理]の権限が必要です。)
+help.add_field(name=f'{pf}ping',value='BOTの応答速度を計測します。')
+
 #便利かなぁと作った
 def p_check(member,channel,permission,level=None):
     if type(channel) == discord.TextChannel:
@@ -312,12 +318,8 @@ async def commands(message,pf):
                         timeout = False
 
     if message.content == f'{pf}help':
-        embed=discord.Embed(title='コマンド',colour=0x00bfff)
-        embed.add_field(name=f'{pf}search [user|server] <ID>',value='サーバー情報|ユーザー情報を表示します。')
-        embed.add_field(name=f'{pf}clear',value='チャンネル内のメッセージを一括削除します。\n[メッセージの管理]の権限が必要です。')
-        embed.add_field(name=f'{pf}ping',value='BOTの応答速度を計測します。')
         try:
-            await message.channel.send(embed=embed)
+            await message.channel.send(embed=help)
         except discord.errors.Forbidden:
             await no_embed(message)
 
