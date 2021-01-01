@@ -12,9 +12,9 @@ def search_id(text):
     match = regex.findall(text)
     return [int(i) for i in match]
 
-def set_client(c):
-    global client
-    client = c
+def setting(c,p):
+    global client, pf
+    client, pf = c, p
 
 #便利かなぁと作った
 def p_check(member,channel,permission,level=None):
@@ -126,7 +126,7 @@ def screenfetch():
     result = subprocess.run('screenfetch',capture_output=True).stdout.decode()
 
 #メイン
-async def commands(message,pf):
+async def commands(message):
     lpf = len(pf)
     #if message.content == f'{pf}test':
     #    await message.channel.send('@reply')
@@ -351,6 +351,8 @@ async def commands(message,pf):
         ping.pop(message)
 
 async def zatzudan(message):
+    if pf == 'Test@':
+        return
     if message.author != client.user:
         leveling(message.author,message.channel,len(message.content)/2)
         mestime = timedelta.utc2jst(message.created_at)
