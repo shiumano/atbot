@@ -1,6 +1,7 @@
 import discord, importlib, os
 import botsystem
 
+local = False
 try:
     token = os.environ['DISCORD_BOT_TOKEN']
     pf = '@'
@@ -8,9 +9,14 @@ except KeyError:
     with open('/storage/emulated/0/token') as file:
         token = file.read()
     pf = 'Test@'
+    local = True
+
+# heroku時間切れ終わったので
+#pf = '@'
+#local = True
 
 client = discord.Client()
-botsystem.set_client()
+botsystem.set_client(client)
 
 @client.event
 async def on_ready():
@@ -21,7 +27,7 @@ async def on_message(message):
     if message.author.discriminator == '0000':
         return
 
-    if message.content == f'{pf}reload' and pf == 'Test@':
+    if message.content == f'{pf}reload' and local:
         try:
             importlib.reload(botsystem)
             await message.channel.send('Reloaded.')
