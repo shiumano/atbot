@@ -1,5 +1,5 @@
 import discord, importlib, os
-import botsystem
+import botsystem, restart
 
 local = False
 try:
@@ -16,7 +16,7 @@ except KeyError:
 #local = True
 
 client = discord.Client()
-botsystem.set_client(client)
+botsystem.setting(client,pf)
 
 @client.event
 async def on_ready():
@@ -34,6 +34,10 @@ async def on_message(message):
         except Exception as e:
             await message.channel.send(f'Not reloaded : {e}')
 
-    await botsystem.commands(message,pf)
+    await botsystem.commands(message)
     await botsystem.zatzudan(message)
-client.run(token)
+try:
+    client.run(token)
+except Exception as e:
+    print('ログインできませんでした。',e)
+    restart.restart_program()
