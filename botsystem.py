@@ -4,7 +4,7 @@ import multiprocessing as mp
 
 owner = 728289161563340881
 
-ping = []
+ping = {}
 p_test = []
 
 regex = re.compile('\d+')
@@ -12,9 +12,9 @@ def search_id(text):
     match = regex.findall(text)
     return [int(i) for i in match]
 
-def set_client():
+def set_client(c):
     global client
-    client = main.client
+    client = c
 
 #便利かなぁと作った
 def p_check(member,channel,permission,level=None):
@@ -220,11 +220,21 @@ async def commands(message,pf):
             reaction, user = await client.wait_for('reaction_add',check=check)
             await mes.edit(content=reaction.emoji.url)
 
+        elif message.content[6+lpf:] == 'anime':
+            emojis = [emoji for emoji in await message.guild.fetch_emojis() if emoji.animated]
+            mes = await message.channel.send('絵文字を選択してください')
+            for emoji in emojis:
+                await mes.add_reaction(emoji)
+            def check(reaction,user):
+                return user == message.author and reaction.message == mes
+            reaction, user = await client.wait_for('reaction_add',check=check)
+            await mes.edit(content=reaction.emoji.url)
+
         else:
             send = ''
             for id in search_id(message.content[6+lpf:]):
                 send += f'https://cdn.discordapp.com/emojis/{id}.png\n'
-        await message.channel.send(send)
+            await message.channel.send(send)
 
 
     if message.content.startswith(f'{pf}timer'):
@@ -311,30 +321,34 @@ async def commands(message,pf):
                             pass
                         timeout = False
 
+    #熊野神社でお祈りしてきた
+    if message.content == f'{pf}omikuji':
+        kekka = random.choice(('大吉','吉','小吉','凶','大凶'))
+        await message.channel.send(kekka)
+
     if message.content == f'{pf}help':
         help = discord.Embed(title='コマンド',colour=0x00bfff)
-        help.add_field(name=f'{pf}emoji''({emoji})',value='絵文字のURLを取得します。')
+        help.add_field(name=f'{pf}emoji''([{<emojis>}|anime])',value='絵文字のURLを取得します。')
         help.add_field(name=f'{pf}search [user|server] <ID>',value='サーバー情報|ユーザー情報を表示します。\n自分の情報を出すとメモを追加できます。')
-        help.add_field(name=f'{pf}clear (count)',value='チャンネル内のメッセージを一括削除します。\n[メッセージの管理]の権限が必要です。')
+        help.add_field(name=f'{pf}clear (<count>)',value='チャンネル内のメッセージを一括削除します。\n[メッセージの管理]の権限が必要です。')
         help.add_field(name=f'{pf}ping',value='BOTの応答速度を計測します。')
         try:
             await message.channel.send(embed=help)
         except discord.errors.Forbidden:
             await no_embed(message)
 
-    if message.content == f'{pf}ping':
+    if message.content.startswith(f'{pf}ping'):
         global ping
         mes = await message.channel.send('テスト中……')
-        ping.append(mes)
+        ping[mes] = message.created_at.timestamp()
 
-    now = time.time()
     await asyncio.sleep(5)
-    if message in ping:
-        delta = str((now - message.created_at.timestamp())/1000)
+    if message in ping.keys():
+        delta = str((message.created_at.timestamp() - ping[message])/1000)
         latency = str(main.client.latency*1000)
         await message.edit(content=f'Ping : {delta[:6]}ms\n'
                                 f'Latency : {latency[:6]}ms')
-        ping.remove(message)
+        ping.pop(message)
 
 async def zatzudan(message):
     if message.author != client.user:
