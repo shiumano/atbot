@@ -1,5 +1,4 @@
-import __main__ as main
-import discord, asyncio, json, re, random, subprocess, time, timedelta
+import discord, aiohttp, asyncio, json, re, random, subprocess, time, timedelta
 import multiprocessing as mp
 
 owner = 728289161563340881
@@ -8,6 +7,9 @@ ping = {}
 p_test = []
 
 regex = re.compile('\d+')
+
+aionet = aiohttp.ClientSession()
+
 def search_id(text):
     match = regex.findall(text)
     return [int(i) for i in match]
@@ -325,6 +327,17 @@ async def commands(message):
     if message.content == f'{pf}omikuji':
         kekka = random.choice(('大吉','吉','小吉','凶','大凶'))
         await message.channel.send(kekka)
+
+    if message.content == f'{pf}temp':
+        async with aionet.get('https://trigger.macrodroid.com/d41cedd3-ad3f-4ffa-a61e-acbae4733937/temp'):
+            pass
+        def check(message):
+            return message.channel.id == 797752252965322803
+        try:
+            mes = await client.wait_for('message',check=check,timeout=20.)
+            await message.channel.send(mes.content)
+        except:
+            pass
 
     if message.content == f'{pf}help':
         help = discord.Embed(title='コマンド',colour=0x00bfff)
