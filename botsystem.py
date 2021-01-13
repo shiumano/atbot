@@ -366,10 +366,18 @@ async def commands(message):
 async def zatzudan(message):
     if pf == 'Test@':
         return
+    luck = random.randint(1,10)
+    if message.author.id == 749960734049304627:  # 勝手に連携
+        if luck < 3:
+            if 'Googleアシスタント' in message.content:
+                for mes in client.cached_messages:
+                    if mes.channel == message.channel and 'www.google.com' in mes.content:
+                        await message.channel.send('<@749960734049304627>さんでしゃばらないで')
+                        break
+
     if message.author != client.user:
         leveling(message.author,message.channel,len(message.content)/2)
         mestime = timedelta.utc2jst(message.created_at)
-        luck = random.randint(1,10)
         if luck < 5:
             if 'おはよう' in message.content:
                 send = greet(mestime.hour,
