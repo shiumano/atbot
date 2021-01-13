@@ -127,6 +127,8 @@ async def no_embed(message):
 def screenfetch():
     result = subprocess.run('screenfetch',capture_output=True).stdout.decode()
 
+han = 'abcdefghijklmnopqrstuvwxyz1234567890@#%&*/+-=():;!?[],.~^¥$"|+_\\<>`\'{}!?¡¢£¤¥¦§¨©ª«¬®¯°±²³´µ¶·¸¹º»¿¨‐∥…‥‘’“”±×÷≠∞∴℃ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩαβγδεζηθικλμνξοπρστυφχψωАБВГДЕЁЖЗИЙКЛМНОПРСТЩФХЦЧУШЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюяⅠⅡⅢⅣⅤⅥⅦⅧⅨ'
+
 #メイン
 async def commands(message):
     lpf = len(pf)
@@ -252,6 +254,32 @@ async def commands(message):
         else:
             await message.channel.send('自分で言えよアホ')
 
+    if message.content.startswith(f'{pf}death'):
+        arg = message.content[6+lpf:]
+        length = 0
+        lines = {}
+        for line in arg.splitlines():
+            l = 0
+            for s in line:
+                if s in han:
+                    l += 0.4
+                else:
+                    l += 1
+            l += (len(line.split(' '))-1)/5
+            lines[line] = l
+            if l > length:
+                length = l
+        content = '＿'+ '人'*(int(length)+2) +'＿\n'
+        for line in arg.splitlines():
+            l = lines[line]
+            if l < length:
+                s = (length-l)/2
+                space = '　'*int(s) + ' '*int((s-int(s))*5)
+                line = space + line + space
+            content += '＞　' + line + '　＜\n'
+        content += '￣' + 'Y^'*(int((int(length)+2)*0.7+0.5)) + 'Y￣'
+        await message.channel.send(content)
+
     if message.content.startswith(f'{pf}clear'):
         if message.content == f'{pf}clear':
             count = 49999
@@ -364,20 +392,20 @@ async def commands(message):
         ping.pop(message)
 
 async def zatzudan(message):
-    if pf == 'Test@':
-        return
     luck = random.randint(1,10)
     if message.author.id == 749960734049304627:  # 勝手に連携
         if luck < 3:
             if 'Googleアシスタント' in message.content:
-                for mes in client.cached_messages:
+                async for mes in message.channel.history(limit=5):
                     if mes.channel == message.channel and 'www.google.com' in mes.content:
                         await message.channel.send('<@749960734049304627>さんでしゃばらないで')
                         break
 
-    if message.author != client.user:
+    elif message.author != client.user:
         leveling(message.author,message.channel,len(message.content)/2)
         mestime = timedelta.utc2jst(message.created_at)
+        if message.author.bot:
+            luck = random.randint(1,25)
         if luck < 5:
             if 'おはよう' in message.content:
                 send = greet(mestime.hour,
@@ -410,13 +438,14 @@ async def zatzudan(message):
                              'おやすみー')
                 await message.channel.send(send)
 
-    if message.content.endswith('NULL') and len(message.content) < 20 and len(message.content.splitlines()) == 1:
+    if message.content.endswith('？') and luck < 4 and len(message.content) < 20 and len(message.content.splitlines()) == 1:
         def check(msg):
             return msg.channel == message.channel
         try:
-            mes = await client.wait_for('message',check=check,timeout=30)
+            mes = await client.wait_for('message',check=check,timeout=30.)
             if len(mes.content) < 10:
-                await message.channel.send(f'{pf}death {mes.content}')
+                com = await message.channel.send(f'{pf}death {mes.content}')
+                await com.delete()
         except:
             pass
 
