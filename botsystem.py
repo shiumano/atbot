@@ -127,7 +127,7 @@ async def no_embed(message):
 def screenfetch():
     result = subprocess.run('screenfetch',capture_output=True).stdout.decode()
 
-han = 'abcdefghijklmnopqrstuvwxyz1234567890@#%&*/+-=():;!?[],.~^¥$"|+_\\<>`\'{}!?¡¢£¤¥¦§¨©ª«¬®¯°±²³´µ¶·¸¹º»¿¨‐∥…‥‘’“”±×÷≠∞∴℃ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩαβγδεζηθικλμνξοπρστυφχψωАБВГДЕЁЖЗИЙКЛМНОПРСТЩФХЦЧУШЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюяⅠⅡⅢⅣⅤⅥⅦⅧⅨ'
+han = 'abcdefghijklmnopqrstuvwxyz1234567890#%&*/+-=():;!?[],.~^¥$"|+_\\<>`\'{}!?¡¢£¤¥¦§¨©ª«¬®¯°±²³´µ¶·¸¹º»¿¨‐∥…‥‘’“”±×÷≠∞∴℃ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩαβγδεζηθικλμνξοπρστυφχψωАБВГДЕЁЖЗИЙКЛМНОПРСТЩФХЦЧУШЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюяⅠⅡⅢⅣⅤⅥⅦⅧⅨ'
 
 #メイン
 async def commands(message):
@@ -135,20 +135,11 @@ async def commands(message):
     #if message.content == f'{pf}test':
     #    await message.channel.send('@reply')
 
-    if message.content.startswith(f'{pf}search user'):
-        id = int(message.content[12+lpf:])
+    if message.content.startswith(f'{pf}info user'):
+        id = int(message.content[10+lpf:])
         user = await client.fetch_user(id)
         colour = str(user.default_avatar)
-        if colour == 'blurple':
-            colour = discord.Colour.blurple()
-        elif colour == 'grey':
-            colour = discord.Colour.greyple()
-        elif colour == 'green':
-            colour = discord.Colour.green()
-        elif colour == 'orange':
-            colour = discord.Colour.orange()
-        elif colour == 'red':
-            colour = discord.Colour.red()
+        colour = eval(f'discord.Colour.{colour}()'.replace('gray','grayple'))
         if user.bot:
             u_b = 'BOT'
         else:
@@ -199,8 +190,8 @@ async def commands(message):
                         await message.channel.send('メモを設定しました。')
 
 
-    if message.content.startswith(f'{pf}search server'):
-        id = int(message.content[14+lpf:])
+    if message.content.startswith(f'{pf}info server'):
+        id = int(message.content[12+lpf:])
         server = client.get_guild(id)
         owner = await client.fetch_user(server.owner_id)
         data = discord.Embed(title='サーバー情報',colour=owner.colour)
@@ -256,9 +247,10 @@ async def commands(message):
 
     if message.content.startswith(f'{pf}death'):
         arg = message.content[6+lpf:]
+        test = message.clean_content[6+lpf:]
         length = 0
-        lines = {}
-        for line in arg.splitlines():
+        lines = []
+        for line in test.splitlines():
             l = 0
             for s in line:
                 if s in han:
@@ -266,18 +258,20 @@ async def commands(message):
                 else:
                     l += 1
             l += (len(line.split(' '))-1)/5
-            lines[line] = l
+            lines.append(l)
             if l > length:
                 length = l
-        content = '＿'+ '人'*(int(length)+2) +'＿\n'
+        content = '＿'+ '人'*(int(length+0.5)+2) +'＿\n'
+        index = 0
         for line in arg.splitlines():
-            l = lines[line]
+            l = lines[index]
             if l < length:
                 s = (length-l)/2
                 space = '　'*int(s) + ' '*int((s-int(s))*5)
                 line = space + line + space
             content += '＞　' + line + '　＜\n'
-        content += '￣' + 'Y^'*(int((int(length)+2)*0.7+0.5)) + 'Y￣'
+            index += 1
+        content += '￣' + 'Y^'*(int((int(length)+2)*0.88+0.5)) + 'Y￣'
         await message.channel.send(content)
 
     if message.content.startswith(f'{pf}clear'):
@@ -369,10 +363,11 @@ async def commands(message):
 
     if message.content == f'{pf}help':
         help = discord.Embed(title='コマンド',colour=0x00bfff)
-        help.add_field(name=f'{pf}emoji''([{<emojis>}|anime])',value='絵文字のURLを取得します。')
-        help.add_field(name=f'{pf}search [user|server] <ID>',value='サーバー情報|ユーザー情報を表示します。\n自分の情報を出すとメモを追加できます。')
+        help.add_field(name=f'{pf}emoji ''([{<emojis>}|anime])',value='絵文字のURLを取得します。')
+        help.add_field(name=f'{pf}info [user|server] <ID>',value='サーバー情報|ユーザー情報を表示します。\n自分の情報を出すとメモを追加できます。')
         help.add_field(name=f'{pf}clear (<count>)',value='チャンネル内のメッセージを一括削除します。\n[メッセージの管理]の権限が必要です。')
         help.add_field(name=f'{pf}ping',value='BOTの応答速度を計測します。')
+        help.add_field(name=f'{pf}death <string>',value='突然の死を生成します')
         try:
             await message.channel.send(embed=help)
         except discord.errors.Forbidden:
@@ -386,7 +381,7 @@ async def commands(message):
     await asyncio.sleep(5)
     if message in ping.keys():
         delta = str((message.created_at.timestamp() - ping[message])/1000)
-        latency = str(main.client.latency*1000)
+        latency = str(client.latency*1000)
         await message.edit(content=f'Ping : {delta[:6]}ms\n'
                                 f'Latency : {latency[:6]}ms')
         ping.pop(message)
@@ -449,4 +444,4 @@ async def zatzudan(message):
         except:
             pass
 
-print('読み込み完了')
+print(f'{time.ctime().split(" ")[3]} 読み込み完了')
