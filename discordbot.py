@@ -2,6 +2,9 @@ import discord,random,os
 token=os.environ['DISCORD_BOT_TOKEN']
 client=discord.Client()
 @client.event
+async def on_ready():
+ print('hello')
+@client.event
 async def on_message(m):
  if m.channel.id==726265421803683910:
   while 1:
