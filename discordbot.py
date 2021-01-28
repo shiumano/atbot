@@ -2,18 +2,13 @@ import discord, importlib, os
 import botsystem, restart
 
 local = False
+pf = '@'
 try:
     token = os.environ['DISCORD_BOT_TOKEN']
-    pf = '@'
 except KeyError:
     with open('/storage/emulated/0/token') as file:
         token = file.read()
-    pf = 'Test@'
     local = True
-
-# heroku時間切れ終わったので
-#pf = '@'
-#local = True
 
 client = discord.Client()
 botsystem.setting(client,pf)
@@ -35,10 +30,10 @@ async def on_message(message):
             await message.channel.send(f'Not reloaded : {e}')
 
     await botsystem.commands(message)
-    if not local:
-        await botsystem.zatzudan(message)
+    await botsystem.zatzudan(message)
+
 try:
     client.run(token)
 except Exception as e:
-    print('ログインできませんでした。',e)
+    print('ログインできませんでした。: ',e)
     restart.restart_program()
