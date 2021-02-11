@@ -19,14 +19,25 @@ def setting(c,p):
     client, pf = c, p
 
 #便利かなぁと作った
-def p_check(member,channel,permissions):
+def p_check(member,channel,**permissions):
     permission = discord.Permissions()
     for name in permissions:
-        eval(f'permission.update({name}=True)')
+        permission.update(**permissions)
     if type(channel) == discord.TextChannel:
-        if member.id == owner or member.permissions_in(channel) >= permission:
-            return True
+        return True
+    elif member.id == owner or member.permissions_in(channel) >= permission:
+        return True
     return False
+
+def send_check(channel):
+    if type(channel) in (discord.DMChannel,discord.GroupChannel):
+        return 0
+    elif p_check(channel.guild.me,channel,embed_links=True):
+        return 0
+    elif p_check(guild.me,channel,send_messages=True):
+        return 1
+    else:
+        return 2
 
 def greet(time,a,b,c,d,e,f,g):
     if time <= 4:
@@ -52,13 +63,20 @@ async def commands(message):
     lpf = len(pf)
 
     content = message.content
+    start = content.startswith
     author = message.author
     channel = message.channel
     guild = message.guild
-    # if content == f'{pf}test':
+
+    p = send_check(channel)
+
+    if p == 2:
+        return
+
+    # elif content == f'{pf}test':
     #     await channel.send(f'{pf}reply')
 
-    if content.startswith(f'{pf}info user'):
+    elif start(f'{pf}info user'):
         id = int(content[10+lpf:])
         user = await client.fetch_user(id)
         colour = str(user.default_avatar)
@@ -74,18 +92,16 @@ async def commands(message):
         data.add_field(name='アイコン',value='\u200c')
         data.set_image(url=user.avatar_url)
 
-        if type(channel) != discord.TextChannel:
+        if p == 0:
             await channel.send(embed=data)
-        elif p_check(guild.me,channel,('embed_links',)):
-            await channel.send(embed=data)
-        elif p_check(guild.me,channel,('send_messages',)):
+        else:
             text = data.title+'\n>>> '
             for field in data.fields:
                 text += field.name+'```\n'+field.value+'\n```\n'
             text += data.image.url
             await channel.send(text)
 
-    if content.startswith(f'{pf}info server'):
+    elif start(f'{pf}info server'):
         id = int(content[12+lpf:])
         server = client.get_guild(id)
         owner = await client.fetch_user(server.owner_id)
@@ -98,18 +114,16 @@ async def commands(message):
         data.add_field(name='アイコン',value='\u200c')
         data.set_image(url=server.icon_url)
 
-        if type(channel) != discord.TextChannel:
+        if p == 0:
             await channel.send(embed=data)
-        elif p_check(guild.me,channel,('embed_links',)):
-            await channel.send(embed=data)
-        elif p_check(guild.me,channel,('send_messages',)):
+        else:
             text = data.title+'\n>>> '
             for field in data.fields:
                 text += field.name+'```\n'+field.value+'\n```\n'
             text += data.image.url
             await channel.send(text)
 
-    if content.startswith(f'{pf}emoji'):
+    elif start(f'{pf}emoji'):
         if content == f'{pf}emoji':
             mes = await channel.send('リアクションを追加してください')
             def check(reaction,user):
@@ -134,7 +148,7 @@ async def commands(message):
             await channel.send(send)
 
 
-    if content.startswith(f'{pf}timer'):
+    elif start(f'{pf}timer'):
         set_time = int(content[6+lpf:])
         if set_time < 0:
             await channel.send('マイナスは指定できません。')
@@ -144,7 +158,7 @@ async def commands(message):
                 await asyncio.sleep(set_time)
             await channel.send(f'{set_time}秒経過しました')
 
-    if content.startswith(f'{pf}death'):
+    elif start(f'{pf}death'):
         arg = content[6+lpf:]
         test = message.clean_content[6+lpf:]
         length = 0
@@ -173,7 +187,7 @@ async def commands(message):
         content += '￣' + 'Y^'*(int((int(length)+2)*0.88+0.5)) + 'Y￣'
         await channel.send(content)
 
-    if content.startswith(f'{pf}clear'):
+    elif start(f'{pf}clear'):
         if content == f'{pf}clear':
             count = 49999
             collect = False
@@ -182,7 +196,7 @@ async def commands(message):
             count = int(content[6+lpf:])-1
             collect = True
             buttons = ('⭕','❌','⬇️','⬆️')
-        if p_check(author,channel,('manage_messages',)):
+        if p_check(author,channel,manage_messages=True):
             if len(buttons) == 4:
                 kakunin = await channel.send('プレビューの読み込み中……')
                 messages = await channel.history(limit=count + 201).flatten()
@@ -193,7 +207,12 @@ async def commands(message):
                 else:
                     preview = messages[count]
                 embed = discord.Embed(title=f'{count+1}個前のメッセージ',description=preview.content,colour=0x00bfff)
-                await kakunin.edit(content='削除しますか？',embed=embed)
+                if p == 0:
+                    await kakunin.edit(content='削除しますか？',embed=embed)
+                else:
+                    text = f'__削除しますか？__\n{count+1}個前のメッセージ\n>>> {embed.description}'
+                    await kakunin.edit(content=text)
+
             else:
                 kakunin = await channel.send('チャンネル内のメッセージを消去しますか？')
             for button in buttons:
@@ -237,7 +256,11 @@ async def commands(message):
                         preview = messages[count]
                         embed.title = f'{count+1}個前のメッセージ'
                         embed.description = preview.content
-                        await kakunin.edit(embed=embed)
+                        if p == 0:
+                            await kakunin.edit(embed=embed)
+                        else:
+                            text = f'__削除しますか？__\n{count+1}個前のメッセージ\n>>> {embed.description}'
+                            await kakunin.edit(content=text)
                         try:
                             await reaction.remove(user)
                         except:
@@ -245,11 +268,11 @@ async def commands(message):
                         timeout = False
 
     #熊野神社でお祈りしてきた
-    if content == f'{pf}omikuji':
+    elif content == f'{pf}omikuji':
         kekka = random.choice(('大吉','吉','小吉','凶','大凶'))
         await channel.send(kekka)
 
-    if content == f'{pf}temp':
+    elif content == f'{pf}temp':
         async with aionet.get('https://trigger.macrodroid.com/d41cedd3-ad3f-4ffa-a61e-acbae4733937/temp'):
             pass
         def check(message):
@@ -260,35 +283,49 @@ async def commands(message):
         except:
             pass
 
-    if content == f'{pf}help':
+    elif content == f'{pf}help':
         help = discord.Embed(title='コマンド',colour=0x00bfff)
         help.add_field(name=f'{pf}emoji ''([{<emojis>}|anime])',value='絵文字のURLを取得します。')
         help.add_field(name=f'{pf}info [user|server] <ID>',value='サーバー情報|ユーザー情報を表示します。\n自分の情報を出すとメモを追加できます。')
         help.add_field(name=f'{pf}clear (<count>)',value='チャンネル内のメッセージを一括削除します。\n[メッセージの管理]の権限が必要です。')
         help.add_field(name=f'{pf}ping',value='BOTの応答速度を計測します。')
         help.add_field(name=f'{pf}death <string>',value='突然の死を生成します')
-        if type(channel) != discord.TextChannel:
+        if p == 0:
             await channel.send(embed=help)
-        elif p_check(guild.me,channel,('embed_links',)):
-            await channel.send(embed=help)
-        elif p_check(guild.me,channel,('send_messages',)):
+        else:
             text = data.title+'\n>>> '
             for field in data.fields:
                 text += field.name+'```\n'+field.value+'\n```\n'
-            text += data.image.url
             await channel.send(text)
 
-    if content.startswith(f'{pf}ping'):
+    elif start(f'{pf}ping'):
         global ping
+        now = time.time() - 32400
         mes = await channel.send('テスト中……')
-        ping[mes] = message.created_at.timestamp()
+        ping[mes] = (message.created_at.timestamp(),now)
 
+    now = time.time()
     await asyncio.sleep(5)
     if message in ping.keys():
-        delta = str((message.created_at.timestamp() - ping[message])/1000)
+        ping_now = ping[message]
+        mestime = message.created_at.timestamp()
+        delta_re = str((ping_now[1] - ping_now[0])*1000)
+        delta_se = str((mestime - ping_now[1])*1000)
+        delta_all = str((mestime - ping_now[0])*1000)
         latency = str(client.latency*1000)
-        await message.edit(content=f'Ping : {delta[:6]}ms\n'
-                                f'Latency : {latency[:6]}ms')
+        result = discord.Embed(title='Pong',colour=0x00bfff)
+        result.add_field(name='受信',value=f'{delta_re[:6]}ms')
+        result.add_field(name='送信',value=f'{delta_se[:6]}ms')
+        result.add_field(name='全体',value=f'{delta_all[:6]}ms')
+        result.add_field(name='レイテンシ',value=f'{latency[:6]}ms')
+        print('最初',ping_now[0])
+        print('受信',ping_now[1])
+        print('送信',mestime)
+        if p == 0:
+            await message.edit(content=None,embed=result)
+        else:
+            await message.edit(content=f'Ping : {delta_all[:6]}ms\n'
+                                       f'Latency : {latency[:6]}ms')
         ping.pop(message)
 
 async def zatzudan(message):
@@ -343,7 +380,10 @@ async def zatzudan(message):
                              'おやすみー')
                 await channel.send(send)
 
-    if content.endswith('？') and luck < 4 and len(content) < 20 and len(content.splitlines()) == 1:
+    if message.reference and luck < 10:
+        await channnel.send('そうだよ(便乗')
+
+    if content.endswith('？') and luck < 3 and len(content) < 20 and len(content.splitlines()) == 1:
         def check(msg):
             return msg.channel == channel
         try:
@@ -354,4 +394,4 @@ async def zatzudan(message):
         except:
             pass
 
-print(f'{time.ctime().split(" ")[3]} 読み込み完了')
+print(f'{time.ctime().split(" ")[-2]} 読み込み完了')

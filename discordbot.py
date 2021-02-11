@@ -1,4 +1,4 @@
-import discord, importlib, os
+import discord, time, importlib, os, traceback
 import botsystem, restart
 
 local = False
@@ -31,6 +31,29 @@ async def on_message(message):
 
     await botsystem.commands(message)
     await botsystem.zatzudan(message)
+
+@client.event
+async def on_raw_reaction_add(payload):
+    message = await client.get_channel(payload.channel_id).fetch_message(payload.message_id)
+    emoji = str(payload.emoji)
+
+    if emoji == '🔄':
+        await on_message(message)
+
+@client.event
+async def on_error(event,*args,**kwargs):
+    print(f'\n{time.ctime().split(" ")[-2]}\nIgnoring exception in {event}')
+    if event == 'on_message':
+        message = args[0]
+        if type(message.channel) == discord.TextChannel:
+            channel = message.channel.name
+        else:
+            channel = message.channel.recipient.name+"'s DMChannel"
+        print(f'at : {channel}\nfor : {message.content}')
+    elif event == 'on_raw_reaction_add':
+        print(f'emoji : {args[0].emoji}')
+
+    traceback.print_exc()
 
 try:
     client.run(token)
