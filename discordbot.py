@@ -1,8 +1,9 @@
-import discord, time, importlib, os, traceback
+import discord, asyncio, time, importlib, os, traceback
 import botsystem, restart
 
 local = False
-pf = '@'
+prefix = '@'
+prefixes = {}
 try:
     token = os.environ['DISCORD_BOT_TOKEN']
 except KeyError:
@@ -11,7 +12,10 @@ except KeyError:
     local = True
 
 client = discord.Client()
-botsystem.setting(client,pf)
+botsystem.setting(client)
+async def do_on_message(message):
+    pass
+
 
 @client.event
 async def on_ready():
@@ -19,18 +23,28 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
+    if type(message.channel) == discord.TextChannel:
+        pf = prefixes.get(message.guild.id)
+    else:
+        pf = prefixes.get(message.channel.id)
+    if pf is None:
+        pf = prefix
+    content = message.content
+    start = content.startswith
     if message.author.discriminator == '0000':
         return
 
     if message.content == f'{pf}reload' and local:
         try:
+            await botsystem.aionet.close()
             importlib.reload(botsystem)
             await message.channel.send('Reloaded.')
         except Exception as e:
             await message.channel.send(f'Not reloaded : {e}')
 
-    await botsystem.commands(message)
-    await botsystem.zatzudan(message)
+    if message.content.startswith(pf):
+        await botsystem.commands(message,pf)
+    await botsystem.zatzudan(message,pf)
 
 @client.event
 async def on_raw_reaction_add(payload):
@@ -46,9 +60,9 @@ async def on_error(event,*args,**kwargs):
     if event == 'on_message':
         message = args[0]
         if type(message.channel) == discord.TextChannel:
-            channel = message.channel.name
+            channel = f'{message.channel.guild} / {message.channel.name} ({message.channel.id})'
         else:
-            channel = message.channel.recipient.name+"'s DMChannel"
+            channel = message.channel.recipient.name+f"'s DMChannel ({message.channel.id})"
         print(f'at : {channel}\nfor : {message.content}')
     elif event == 'on_raw_reaction_add':
         print(f'emoji : {args[0].emoji}')
@@ -57,6 +71,8 @@ async def on_error(event,*args,**kwargs):
 
 try:
     client.run(token)
+    asyncio.run(botsystem.aionet.close())
 except Exception as e:
     print('ログインできませんでした。: ',e)
+    asyncio.run(botsystem.aionet.close())
     restart.restart_program()
