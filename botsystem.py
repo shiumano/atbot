@@ -1,5 +1,14 @@
-import discord, aiohttp, asyncio, async_google_trans_new, json, re, random, subprocess, time, timedelta
-import multiprocessing as mp
+import discord
+import aiohttp
+import asyncio
+import async_google_trans_new
+import platform
+import psutil
+import re
+import random
+import sys
+import time
+import timedelta
 
 owner = 728289161563340881
 
@@ -137,7 +146,7 @@ async def commands(message,pf):
                 g = True
 
             except IndexError:
-                await send('IDを指定してください')
+                server = guild
 
             except ValueError:
                 try:
@@ -368,8 +377,26 @@ async def commands(message,pf):
         if argc == 0:
             ch = channel
         else:
-            ch = message.channel_mentions[0]
-        
+            if len(message.channel_mentions) > 0:
+                ch = message.channel_mentions[0]
+            else:
+                await send('チャンネルを指定してください')
+
+
+    elif command == f'{pf}system':
+        data = discord.Embed(title='システム情報',colour=0x00bfff)
+        data.add_field(name='Pythonバージョン',value=sys.version)
+        data.add_field(name='Discord.pyバージョン',value=discord.__version__)
+        data.add_field(name='OS',value=platform.platform())
+        data.add_field(name='CPU使用率',value=f'{psutil.cpu_percent()}%')
+        data.add_field(name='BOT起動時刻',value=timedelta.time2jt(psutil.boot_time()))
+        if p == 2:
+            await send(embed=data)
+        else:
+            text = data.title+'\n>>> '
+            for field in data.fields:
+                text += field.name+'```\n'+field.value+'\n```\n'
+            await send(text)
 
     elif command == f'{pf}help':
         help = discord.Embed(title='コマンド',colour=0x00bfff)
@@ -466,6 +493,12 @@ async def zatzudan(message,pf):
                 await com.delete()
         except:
             pass
+
+    if 'ｱﾋｬ' in message.content:
+            if luck < 7:
+                await message.channel.send('( ﾟ∀ﾟ)ｱﾋｬ')
+            else:
+                await message.channel.send('飽きた()')
 
     await asyncio.sleep(5)
     if message in ping.keys():
