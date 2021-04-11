@@ -1,3 +1,4 @@
 discord.py
 psutil
 async_google_trans_new
+youtube_dl
