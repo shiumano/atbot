@@ -2,7 +2,7 @@ import discord, asyncio, time, importlib, os, traceback
 import botsystem, restart
 
 local = False
-prefix = 'Test@'
+prefix = '@'
 prefixes = {}
 
 try:
