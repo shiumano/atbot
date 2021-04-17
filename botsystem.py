@@ -60,7 +60,7 @@ owner = 728289161563340881
 ping = {}
 p_test = []
 
-regex = re.compile('\d+')
+regix = re.compile('\d+')
 
 aionet = aiohttp.ClientSession()
 
@@ -111,6 +111,48 @@ def greet(time,a,b,c,d,e,f,g):
 
 han = 'abcdefghijklmnopqrstuvwxyz1234567890#%&*/+-=():;!?[],.~^¥$"|+_\\<>`\'{}!?¡¢£¤¥¦§¨©ª«¬®¯°±²³´µ¶·¸¹º»¿¨‐∥…‥‘’“”±×÷≠∞∴℃ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩαβγδεζηθικλμνξοπρστυφχψωАБВГДЕЁЖЗИЙКЛМНОПРСТЩФХЦЧУШЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюяⅠⅡⅢⅣⅤⅥⅦⅧⅨ'
 
+def str2datetime(arg,args):
+    date = ''
+    time_ = ''
+    count = len(arg.split('/'))
+    if count == 3:
+        date = '%Y/%m/%d'
+        index = argv.index(arg)
+        time__ = argv[index+1]
+        if ':' in time__:
+            count = len(time__.split(':'))
+            if count == 4:
+                time_ = ' %H:%M:%S:%f'
+                arg += argv.pop(index+1)
+            elif count == 3:
+                time_ = ' %H:%M:%S'
+                arg += argv.pop(index+1)
+            elif count == 2:
+                try:
+                    int(time__.split(':')[0])
+                except ValueError:                                                                    pass
+                else:
+                    time_ = ' %H:%M'
+                    arg += argv.pop(index+1)
+            else:
+                try:
+                    int(time__)
+                except ValueError:
+                    pass
+                else:
+                    time_ = ' %H'
+                    arg += argv.pop(index+1)
+    elif count == 2:
+        date = '%Y/%m'
+    elif count == 1:
+        date = '%Y'
+    try:
+        datetime_ = datetime.datetime.strptime(arg,date+time_)
+    except ValueError:
+        pass
+    argv.remove(arg)
+    return datetime_
+
 #メイン
 async def commands(message,pf):
     lpf = len(pf)
@@ -160,7 +202,7 @@ async def commands(message,pf):
             except IndexError:
                 await send('IDを指定してください')
             except ValueError:
-                await send('IDは18桁の数字で指定してください')
+                await send('IDは数字で指定してください')
             except discord.errors.NotFound:
                 await send('ユーザーが見つかりませんでした')
             else:
@@ -201,7 +243,7 @@ async def commands(message,pf):
                 try:
                     invite = await client.fetch_invite(argv[2])
                 except discord.errors.NotFound:
-                    await send('IDは18桁の数字で指定してください')
+                    await send('IDは数字で指定してください')
                 else:
                     server = invite.guild
                     g = False
@@ -398,17 +440,6 @@ async def commands(message,pf):
         kekka = random.choice(('大吉','吉','小吉','凶','大凶'))
         await send(kekka)
 
-    elif command == f'{pf}temp' and False:  #使用価値ねーし
-        async with aionet.get('https://trigger.macrodroid.com/d41cedd3-ad3f-4ffa-a61e-acbae4733937/temp'):
-            pass
-        def check(message):
-            return channel.id == 797752252965322803
-        try:
-            mes = await client.wait_for('message',check=check,timeout=20.)
-            await send(mes.content)
-        except:
-            pass
-
     elif command == f'{pf}trans':
         translator = async_google_trans_new.google_translator()
         lang = argv[1]
@@ -423,13 +454,64 @@ async def commands(message,pf):
             await send(text)
 
     elif command == f'{pf}history':
-        if argc == 0:
-            ch = channel
-        else:
-            if len(message.channel_mentions) > 0:
-                ch = message.channel_mentions[0]
-            else:
-                await send('チャンネルを指定してください')
+        argv.pop(0)
+        keys = {'count':50000,
+                'from':[],
+                'mentions':[],
+                'has':{'kind':[],'type':[],'set':'and'},
+                'befor':None,
+                'during':None,
+                'after':None,
+                'in':None}
+        parsed_args = []
+        for arg in argv:
+            if arg.startswith('count:'):
+                keys['count'] = int(arg[6:])
+                parsed_args.append(arg)
+            elif arg.startswith('from:'):
+                if '<@' in arg:
+                    keys['from'].append(client.fetch_user(arg[7:-1]))
+                else:
+                    keys['from'].append(arg[5:])
+                parsed_args.append(arg)
+            elif arg.startswith('mentions:'):
+                if '<@' in arg:                                                   keys['mentions'].append(client.fetch_user(arg[11:-1]))
+                else:
+                    keys['mentions'].append(arg[9:])
+                parsed_args.append(arg)
+            elif arg.startswith('has:'):
+                kind = arg[4:].lower()
+                if kind in ('リンクで検索','link'):
+                    keys['has']['kind'].append('link')
+                elif kind in ('埋め込みを検索','embed'):
+                    keys['has']['kind'].append('embed')
+                elif kind in ('ファイルを検索','file'):
+                    keys['has']['kind'].append('file')
+                elif kind in ('動画を検索','movie'):
+                    keys['has']['kind'].append('movie')
+                elif kind in ('画像を検索','picture'):
+                    keys['has']['kind'].append('picture')
+                elif kind in ('音声付きを検索','sound'):
+                    keys['has']['kind'].append('sound')
+                elif kind.startswith('.'):
+                    keys['has']['type'].append(kind)
+                elif kind == ':or':
+                    keys['has']['set'] = 'or'
+                parsed_args.append(arg)
+            elif arg.startswith('befor:'):
+                keys['befor'] = str2datetime(arg,argv)
+                parsed_args.append(arg)
+            elif arg.startswith('during'):
+                keys['during'] = str2datetime(arg,argv)
+                parsed_args.append(arg)
+            elif arg.startswith('after'):
+                keys['after'] = str2datetime(arg,argv)
+                parsed_args.append(arg)
+            elif arg.startswith('in'):
+                keys['in'] = message.channel
+                parsed_args.append(arg)
+        await send(keys)
+
 
 
     elif command == f'{pf}system':
@@ -449,30 +531,31 @@ async def commands(message,pf):
 
     elif command == f'{pf}voice':
         if argv[1] == 'join':
-            if message.author.voice is None:
-                await message.channel.send("あなたはボイスチャンネルに接続していません。")
+            if author.voice is None:
+                await send("あなたはボイスチャンネルに接続していません。")
             else:
                 # ボイスチャンネルに接続する
-                await message.author.voice.channel.connect()
-                await message.channel.send("接続しました。")
+                await author.voice.channel.connect()
+                await send("接続しました。")
 
         elif argv[1] == 'leave':
-            if message.guild.voice_client is None:
-                await message.channel.send("接続していません。")
+            if guild.voice_client is None:
+                await send("接続していません。")
             else:
                 # 切断する
-                await message.guild.voice_client.disconnect()
-                await message.channel.send("切断しました。")
+                await guild.voice_client.disconnect()
+                await send("切断しました。")
 
         elif argv[1] == 'play':
-            if message.guild.voice_client is None:
-                await message.channel.send("接続していません。")
+            if guild.voice_client is None:
+                await send("接続していません。")
             else:
+                mes = await send('ロード中………')
                 player = await YTDLSource.from_url(argv[2], loop=client.loop)
 
                 # 再生する
-                await message.guild.voice_client.play(player)
-                await message.channel.send('{} を再生します。'.format(player.title))
+                await guild.voice_client.play(player)
+                await mes.edit(content='{} を再生します。'.format(player.title))
 
         elif argv[1] == '':
             1
