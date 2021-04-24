@@ -64,6 +64,10 @@ regix = re.compile('\d+')
 
 aionet = aiohttp.ClientSession()
 
+tips = ['メッセージに付けられるリアクションは20個までです',
+        '「🔄」というリアクションをメッセージに付けることで再実行できます',
+       ]
+
 def search_id(text):
     match = regex.findall(text)
     return [int(i) for i in match  if len(i) == 18]
@@ -569,6 +573,7 @@ async def commands(message,pf):
         help.add_field(name=f'{pf}timer <seconds>',value='指定した秒数のあとメッセージを送信します。')
         help.add_field(name=f'{pf}voice [join|leave|play <url>]',value='ボイスチャンネルで動画を再生します。')
         help.add_field(name=f'{pf}death <string>',value='突然の死を生成します')
+        help.set_footer(f'Tips:{random.choice(tips)}')
         if p == 2:
             await send(embed=help)
         else:
