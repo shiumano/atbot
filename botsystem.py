@@ -450,7 +450,7 @@ async def commands(message,pf):
         if p == 2:
             await send(embed=embed)
         else:
-            text='翻訳結果\n>>>' + result
+            text='翻訳結果\n>>> ' + result
             await send(text)
 
     elif command == f'{pf}history':
@@ -567,6 +567,7 @@ async def commands(message,pf):
         help.add_field(name=f'{pf}clear (<count>)',value='チャンネル内のメッセージを一括削除します。\n[メッセージの管理]の権限が必要です。')
         help.add_field(name=f'{pf}ping',value='BOTの応答速度を計測します。')
         help.add_field(name=f'{pf}timer <seconds>',value='指定した秒数のあとメッセージを送信します。')
+        help.add_field(name=f'{pf}voice [join|leave|play <url>]',value='ボイスチャンネルで動画を再生します。')
         help.add_field(name=f'{pf}death <string>',value='突然の死を生成します')
         if p == 2:
             await send(embed=help)
