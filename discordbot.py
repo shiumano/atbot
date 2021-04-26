@@ -1,21 +1,21 @@
-import discord, asyncio, time, importlib, os, traceback
+import discord, asyncio, time, importlib, os, traceback, sys
 import botsystem, restart
 
 local = False
-prefix = '@'
+prefix = 'Kat.'
 prefixes = {}
 
 try:
     token = os.environ['DISCORD_BOT_TOKEN']
 except KeyError:
     # with open('/data/data/com.termux/files/home/token') as file:
-    with open('/storage/emulated/0/token') as file:
+    with open('/storage/emulated/0/atbot/token') as file:
         token = file.read()
     local = True
 
-#intents = discord.Intents.all()
+intents = discord.Intents.all()
 
-client = discord.Client() #intents=intents)
+client = discord.Client(intents=intents)
 botsystem.setting(client)
 
 async def do_on_message(message):
@@ -25,8 +25,38 @@ async def do_on_message(message):
 async def on_ready():
     print(f'{client.user}としてログインしました')
 
+    if len(sys.argv) == 2:
+        if sys.argv[1] == 'debug':
+            while True:
+                content = input().replace(';','\n')
+                run = ('global func\n'
+                       'async def func():\n')
+                for line in content.splitlines():
+                    run += f'    {line}\n'
+                run += '    return'
+                try:
+                    exec(run)
+                    ret = await func()
+                    print(ret.__class__.__repr__(ret))
+                except Exception as e:
+                    tb_now = e.__traceback__
+                    send = '--Error--\n'
+                    back = 0
+                    while tb_now:
+                        line = tb_now.tb_lineno
+                        filename = tb_now.tb_frame.f_code.co_filename
+                        if filename == '<string>':
+                            code = run.splitlines()[line-1]
+                        else:
+                            with open(filename) as f:
+                                code = f.readlines()[line-1]
+                        send += f'file "{filename}" line {line}\npy\n{code}\n'
+                        tb_now = tb_now.tb_next
+                    send += f'{e.__class__.__name__}: {e}'
+                    print(send)
+
 @client.event
-async def on_message(message):
+async def on_message(message,original=True):
     if type(message.channel) == discord.TextChannel:
         pf = prefixes.get(message.guild.id)
     else:
@@ -52,6 +82,7 @@ async def on_message(message):
                 'async def func(message):\n')
         for line in content.splitlines():
             run += f'    {line}\n'
+        run += '    return'
         try:
             exec(run)
             ret = await func(message)
@@ -75,7 +106,8 @@ async def on_message(message):
 
     if message.content.startswith(pf):
         await botsystem.commands(message,pf)
-    await botsystem.zatzudan(message,pf)
+    if original:
+        await botsystem.zatzudan(message,pf)
     await do_on_message(message)
 
 @client.event
@@ -84,7 +116,14 @@ async def on_raw_reaction_add(payload):
     emoji = str(payload.emoji)
 
     if emoji == '🔄':
-        await on_message(message)
+        await on_message(message,original=False)
+
+@client.event
+async def on_message_edit(befor,after):
+    async for mes in after.channel.history(limit=5):
+        if mes == message:
+            await on_message(after,original=False)
+            break
 
 @client.event
 async def on_error(event,*args,**kwargs):
