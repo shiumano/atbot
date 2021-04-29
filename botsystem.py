@@ -66,7 +66,9 @@ aionet = aiohttp.ClientSession()
 
 tips = ['メッセージに付けられるリアクションは20個までです',
         '「🔄」というリアクションをメッセージに付けることで再実行できます',
-       ]
+        '入れるサーバーの数は最大で100個です。',
+        'サーバーの最大人数は700000人です。',
+        ]
 
 def search_id(text):
     match = regex.findall(text)
@@ -558,11 +560,21 @@ async def commands(message,pf):
                 player = await YTDLSource.from_url(argv[2], loop=client.loop)
 
                 # 再生する
-                await guild.voice_client.play(player)
                 await mes.edit(content='{} を再生します。'.format(player.title))
+                await guild.voice_client.play(player)
 
-        elif argv[1] == '':
-            1
+        elif argv[1] == 'player':
+            def check(mes):
+                return mes.channel == channel
+            while True:
+                mes = await client.wait_for('message',check=check)
+                mes.content = f'{pf}voice '+mes.content
+                try:
+                    await commands(message,pf)
+                except:
+                    pass
+                if mes.content == f'{pf}voice leave':
+                    break
 
     elif command == f'{pf}help':
         help = discord.Embed(title='コマンド',colour=0x00bfff)
@@ -573,7 +585,7 @@ async def commands(message,pf):
         help.add_field(name=f'{pf}timer <seconds>',value='指定した秒数のあとメッセージを送信します。')
         help.add_field(name=f'{pf}voice [join|leave|play <url>]',value='ボイスチャンネルで動画を再生します。')
         help.add_field(name=f'{pf}death <string>',value='突然の死を生成します')
-        help.set_footer(f'Tips:{random.choice(tips)}')
+        help.set_footer(text=f'Tips:{random.choice(tips)}')
         if p == 2:
             await send(embed=help)
         else:
