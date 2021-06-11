@@ -329,8 +329,11 @@ async def commands(message,pf):
         else:
             await send(f'タイマーを{set_time}秒に設定しました')
             async with channel.typing():
-                await asyncio.sleep(set_time)
-            await channel.send(f'{set_time}秒経過しました')
+                await asyncio.sleep(set_time-10)
+            mes = await send(f'{set_time}まで🔟')
+            for emoji in '9⃣8⃣7⃣6⃣5⃣4⃣3⃣2⃣1⃣'
+                await mes.edit(content=f'{set_time}まで{emoji}')
+            await mes.edit(content=f'{set_time}秒経過しました')
 
     elif command == f'{pf}death':
         arg = content[6+lpf:]
@@ -544,37 +547,47 @@ async def commands(message,pf):
                 await author.voice.channel.connect()
                 await send("接続しました。")
 
-        elif argv[1] == 'leave':
-            if guild.voice_client is None:
-                await send("接続していません。")
-            else:
-                # 切断する
-                await guild.voice_client.disconnect()
-                await send("切断しました。")
-
-        elif argv[1] == 'play':
-            if guild.voice_client is None:
-                await send("接続していません。")
-            else:
-                mes = await send('ロード中………')
-                player = await YTDLSource.from_url(argv[2], loop=client.loop)
-
-                # 再生する
-                await mes.edit(content='{} を再生します。'.format(player.title))
-                await guild.voice_client.play(player)
-
         elif argv[1] == 'player':
-            def check(mes):
-                return mes.channel == channel
+            def check(reaction,user):
+                return reaction.message == message
             while True:
-                mes = await client.wait_for('message',check=check)
-                mes.content = f'{pf}voice '+mes.content
                 try:
+                    mes = await client.wait_for('reaction_add',check=check)
                     await commands(message,pf)
                 except:
                     pass
                 if mes.content == f'{pf}voice leave':
                     break
+
+        elif argc > 1 and guild.voice_client is None:
+            await send("接続していません。")
+
+        else:
+            if argv[1] == 'leave':
+                # 切断する
+                await guild.voice_client.disconnect()
+                await send("切断しました。")
+
+            elif argv[1] == 'play':
+                mes = await send('ロード中………')
+                player = await YTDLSource.from_url(argv[2], loop=client.loop)
+
+                # 再生する
+                data = discord.Embed(title='再生中',colour=0x00bfff)
+                data.set_thumbnail(player.data['thumbnails'][-1])
+                data.add_field(name=player.title,value=player.data['description'])
+                await mes.edit(content=None,embed=data)
+                await guild.voice_client.play(player)
+
+            elif argv[1] == 'volume':
+                try:
+                    volume = float(argv[2])
+                except ValueError:
+                    await send('数値で指定してください\nデフォルト：100')
+                except IndexError:
+                    await send('数値を指定してください\nデフォルト：100')
+                else:
+                    guild.voice_client.source.volume = volume / 200
 
     elif command == f'{pf}help':
         help = discord.Embed(title='コマンド',colour=0x00bfff)
@@ -661,6 +674,10 @@ async def zatzudan(message,pf):
                 await send(text)
 
     if message.reference and luck < 3:
+        if message.reference.cached_message:
+            if message.reference.cached_message.author == client.user:
+                send('そっすか(´c_｀ )')
+                return
         await send('そうだよ(便乗')
 
     if content.endswith('？') and luck < 3 and len(content) < 20 and len(content.splitlines()) == 1:
@@ -702,3 +719,6 @@ async def zatzudan(message,pf):
         ping.pop(message)
 
 print(f'{time.ctime().split(" ")[-2]} 読み込み完了')
+
+if __name__ == '__main__':
+    asyncio.run(aionet.close())

@@ -121,9 +121,22 @@ async def on_raw_reaction_add(payload):
 @client.event
 async def on_message_edit(befor,after):
     async for mes in after.channel.history(limit=5):
-        if mes == message:
+        if mes == after:
             await on_message(after,original=False)
             break
+
+@client.event
+async def on_guild_join(guild):
+    p = 0
+
+    for channel in guild.text_channels:
+        p += botsystem.send_check(channel)
+
+    if p == 0:
+        try:
+            await guild.me.edit(nick=client.user.name+'info:メッセージを送信できるチャンネルがありません')
+        except:
+            pass
 
 @client.event
 async def on_error(event,*args,**kwargs):
