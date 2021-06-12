@@ -116,6 +116,7 @@ async def on_raw_reaction_add(payload):
     emoji = str(payload.emoji)
 
     if emoji == '🔄':
+        await message.add_reaction(emoji)
         await on_message(message,original=False)
 
 @client.event
