@@ -724,5 +724,3 @@ print(f'{time.ctime().split(" ")[-2]} 読み込み完了')
 
 if __name__ == '__main__':
     asyncio.run(aionet.close())
-
-#Comment
