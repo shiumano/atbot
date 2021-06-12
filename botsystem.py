@@ -331,8 +331,10 @@ async def commands(message,pf):
             async with channel.typing():
                 await asyncio.sleep(set_time-10)
             mes = await send(f'{set_time}まで🔟')
-            for emoji in '9⃣8⃣7⃣6⃣5⃣4⃣3⃣2⃣1⃣'
+            await asyncio.sleep(1)
+            for emoji in '9⃣8⃣7⃣6⃣5⃣4⃣3⃣2⃣1⃣':
                 await mes.edit(content=f'{set_time}まで{emoji}')
+                await asyncio.sleep(1)
             await mes.edit(content=f'{set_time}秒経過しました')
 
     elif command == f'{pf}death':
@@ -722,3 +724,5 @@ print(f'{time.ctime().split(" ")[-2]} 読み込み完了')
 
 if __name__ == '__main__':
     asyncio.run(aionet.close())
+
+#Comment
