@@ -1,4 +1,3 @@
-#test
 import discord
 import aiohttp
 import asyncio
