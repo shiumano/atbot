@@ -68,7 +68,13 @@ async def on_message(message,original=True):
     if message.author.discriminator == '0000':
         return
 
-    if message.content == f'{pf}reload' and local:
+    if message.content == f'{pf}update':
+        async with aiohttp.ClientSession() as session:
+            with async_timeout.timeout(10):
+                async with session.get('https://raw.githubusercontent.com/shiumano/atbot/main/botsystem.py') as response:
+                    code = await response.text()
+                    with open('botsystem.py',mode='w') as file:
+                        file.write(code)
         try:
             await botsystem.aionet.close()
             importlib.reload(botsystem)
