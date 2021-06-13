@@ -4,14 +4,15 @@ import botsystem, restart
 local = False
 prefix = 'Kat.'
 prefixes = {}
-
 try:
-    token = os.environ['DISCORD_BOT_TOKEN']
-except KeyError:
     # with open('/data/data/com.termux/files/home/token') as file:
-    with open('/storage/emulated/0/atbot/token') as file:
+    with open('token') as file:
         token = file.read()
     local = True
+
+except:
+    print('token not found.')
+    exit(1)
 
 intents = discord.Intents.all()
 
