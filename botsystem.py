@@ -332,7 +332,7 @@ async def commands(message,pf):
                 await asyncio.sleep(set_time-10)
             mes = await send(f'{set_time}まで🔟')
             await asyncio.sleep(1)
-            for emoji in '9⃣8⃣7⃣6⃣5⃣4⃣3⃣2⃣1⃣':
+            for emoji in ('9⃣','8⃣','7⃣','6⃣','5⃣','4⃣','3⃣','2⃣','1⃣'):
                 await mes.edit(content=f'{set_time}まで{emoji}')
                 await asyncio.sleep(1)
             await mes.edit(content=f'{set_time}秒経過しました')
@@ -579,7 +579,7 @@ async def commands(message,pf):
                 data.set_thumbnail(player.data['thumbnails'][-1])
                 data.add_field(name=player.title,value=player.data['description'])
                 await mes.edit(content=None,embed=data)
-                await guild.voice_client.play(player)
+                guild.voice_client.play(player)
 
             elif argv[1] == 'volume':
                 try:
