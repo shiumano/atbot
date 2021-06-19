@@ -576,7 +576,7 @@ async def commands(message,pf):
 
                 # 再生する
                 data = discord.Embed(title='再生中',colour=0x00bfff)
-                data.set_thumbnail(player.data['thumbnails'][-1])
+                data.set_thumbnail(url=player.data['thumbnails'][-1])
                 data.add_field(name=player.title,value=player.data['description'])
                 await mes.edit(content=None,embed=data)
                 guild.voice_client.play(player)
