@@ -1,4 +1,4 @@
-import discord, asyncio, time, importlib, os, traceback, sys
+import discord, asyncio, aiohttp, time, importlib, os, traceback, sys
 import botsystem, restart
 
 local = False
