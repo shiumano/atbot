@@ -60,6 +60,8 @@ owner = 728289161563340881
 ping = {}
 p_test = []
 
+timer_tasks = {}
+
 regix = re.compile('\d+')
 
 aionet = aiohttp.ClientSession()
@@ -136,7 +138,8 @@ def str2datetime(arg,args):
             elif count == 2:
                 try:
                     int(time__.split(':')[0])
-                except ValueError:                                                                    pass
+                except ValueError:
+                    pass
                 else:
                     time_ = ' %H:%M'
                     arg += argv.pop(index+1)
@@ -171,11 +174,18 @@ async def commands(message,pf):
     channel = message.channel
     send = channel.send
     guild = message.guild
+    parent = message.reference.cached_message
 
     if argv[-1] == 'text':
         p = 1
     else:
         p = send_check(channel)
+
+    if parent is not None:
+        if command.startswith(pf)
+            if timer_tasks.get(parent.id) is not None:
+                timer_tasks[parent.id].append(message)
+                await send('コマンドを予約しました。')
 
     if p == 0:
         can_send = [ch for ch in guild.text_channels() if send_check(ch)]
@@ -326,8 +336,11 @@ async def commands(message,pf):
         set_time = float(argv[1])
         if set_time <= 0:
             await send('0以下は指定できません。')
+        elif set_time <= 10:
+            await send('そのくらい自分で数えろよ……')
         else:
             await send(f'タイマーを{set_time}秒に設定しました')
+            timer_tasks[message.id] = []
             async with channel.typing():
                 await asyncio.sleep(set_time-10)
             mes = await send(f'{set_time}まで🔟')
@@ -336,6 +349,9 @@ async def commands(message,pf):
                 await mes.edit(content=f'{set_time}まで{emoji}')
                 await asyncio.sleep(1)
             await mes.edit(content=f'{set_time}秒経過しました')
+            for task in  timer_tasks[message.id]:
+                await commands(task,pf)
+            timer_tasks.pop(message.id)
 
     elif command == f'{pf}death':
         arg = content[6+lpf:]
@@ -486,7 +502,8 @@ async def commands(message,pf):
                     keys['from'].append(arg[5:])
                 parsed_args.append(arg)
             elif arg.startswith('mentions:'):
-                if '<@' in arg:                                                   keys['mentions'].append(client.fetch_user(arg[11:-1]))
+                if '<@' in arg:
+                    keys['mentions'].append(client.fetch_user(arg[11:-1]))
                 else:
                     keys['mentions'].append(arg[9:])
                 parsed_args.append(arg)
@@ -587,7 +604,7 @@ async def commands(message,pf):
                 except ValueError:
                     await send('数値で指定してください\nデフォルト：100')
                 except IndexError:
-                    await send('数値を指定してください\nデフォルト：100')
+                    await send(f'現在の音量：{guild.voice_client.source.volume/200}')
                 else:
                     guild.voice_client.source.volume = volume / 200
 
@@ -595,7 +612,8 @@ async def commands(message,pf):
         help = discord.Embed(title='コマンド',colour=0x00bfff)
         help.add_field(name=f'{pf}emoji ''([{<emojis>}|anime])',value='絵文字のURLを取得します。')
         help.add_field(name=f'{pf}info [user|server] <ID>',value='サーバー情報|ユーザー情報を表示します。')
-        help.add_field(name=f'{pf}clear (<count>)',value='チャンネル内のメッセージを一括削除します。\n[メッセージの管理]の権限が必要です。')
+        help.add_field(name=f'{pf}clear (<count>)',value='チャンネル内のメッセージを一括削除します。'
+                                                       '\n[メッセージの管理]の権限が必要です。')
         help.add_field(name=f'{pf}ping',value='BOTの応答速度を計測します。')
         help.add_field(name=f'{pf}timer <seconds>',value='指定した秒数のあとメッセージを送信します。')
         help.add_field(name=f'{pf}voice [join|leave|play <url>]',value='ボイスチャンネルで動画を再生します。')
