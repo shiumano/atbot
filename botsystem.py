@@ -163,7 +163,7 @@ def str2datetime(arg,args):
     return datetime_
 
 #メイン
-async def commands(message,pf,**kwargs):
+async def commands(message,pf,original=True,**kwargs):
     lpf = len(pf)
 
     content = message.content
@@ -184,7 +184,7 @@ async def commands(message,pf,**kwargs):
     else:
         p = send_check(channel)
 
-    if parent is not None:
+    if parent is not None and original:
         if command.startswith(pf):
             if timer_tasks.get(parent.id) is not None:
                 timer_tasks[parent.id].append(message)
@@ -354,7 +354,7 @@ async def commands(message,pf,**kwargs):
                 await asyncio.sleep(1)
             await mes.edit(content=f'{set_time}秒経過しました')
             for task in  timer_tasks[message.id]:
-                await commands(task,pf,can_say=True)
+                await commands(task,pf,original=False,can_say=True)
             timer_tasks.pop(message.id)
 
     elif command == f'{pf}death':
