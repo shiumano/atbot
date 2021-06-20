@@ -189,6 +189,7 @@ async def commands(message,pf,**kwargs):
             if timer_tasks.get(parent.id) is not None:
                 timer_tasks[parent.id].append(message)
                 await send('コマンドを予約しました。')
+                return
 
     if p == 0:
         can_send = [ch for ch in guild.text_channels() if send_check(ch)]
@@ -611,6 +612,10 @@ async def commands(message,pf,**kwargs):
                 else:
                     guild.voice_client.source.volume = volume / 200
 
+    elif command == f'{pf}say':
+        if kwargs.get('can_say'):
+            await send(content[4+lpf])
+
     elif command == f'{pf}help':
         help = discord.Embed(title='コマンド',colour=0x00bfff)
         help.add_field(name=f'{pf}emoji ''([{<emojis>}|anime])',value='絵文字のURLを取得します。')
@@ -635,10 +640,6 @@ async def commands(message,pf,**kwargs):
         now = time.time() - 32400
         mes = await send('テスト中……')
         ping[mes] = (message.created_at.timestamp(),now)
-
-    elif command == f'{pf}say':
-        if kwargs.get('can_say'):
-            await send(content[4+lpf])
 
 
 async def zatzudan(message,pf):
