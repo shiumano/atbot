@@ -184,7 +184,7 @@ async def commands(message,pf,original=True,**kwargs):
     else:
         p = send_check(channel)
 
-    if parent is not None and original:
+    if parent and original:
         if command.startswith(pf):
             if timer_tasks.get(parent.id) is not None:
                 timer_tasks[parent.id].append(message)
