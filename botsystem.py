@@ -163,7 +163,7 @@ def str2datetime(arg,args):
     return datetime_
 
 #メイン
-async def commands(message,pf):
+async def commands(message,pf,**kwargs):
     lpf = len(pf)
 
     content = message.content
@@ -353,7 +353,7 @@ async def commands(message,pf):
                 await asyncio.sleep(1)
             await mes.edit(content=f'{set_time}秒経過しました')
             for task in  timer_tasks[message.id]:
-                await commands(task,pf)
+                await commands(task,pf,can_say=True)
             timer_tasks.pop(message.id)
 
     elif command == f'{pf}death':
@@ -635,6 +635,10 @@ async def commands(message,pf):
         now = time.time() - 32400
         mes = await send('テスト中……')
         ping[mes] = (message.created_at.timestamp(),now)
+
+    elif command == f'{pf}say':
+        if kwargs.get('can_say'):
+            await send(content[4+lpf])
 
 
 async def zatzudan(message,pf):
