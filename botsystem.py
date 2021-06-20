@@ -186,7 +186,7 @@ async def commands(message,pf,original=True,**kwargs):
 
     if parent and original:
         if command.startswith(pf):
-            if timer_tasks.get(parent.id) is not None:
+            if timer_tasks.get(parent.id):
                 timer_tasks[parent.id].append(message)
                 await send('コマンドを予約しました。')
                 return
