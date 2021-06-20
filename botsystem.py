@@ -174,7 +174,10 @@ async def commands(message,pf):
     channel = message.channel
     send = channel.send
     guild = message.guild
-    parent = message.reference.cached_message
+    if message.reference:
+        parent = message.reference.cached_message
+    else:
+        parent = None
 
     if argv[-1] == 'text':
         p = 1
