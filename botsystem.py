@@ -184,6 +184,7 @@ async def commands(message,pf,original=True,**kwargs):
     else:
         p = send_check(channel)
 
+    print(parent,original)
     if parent and original:
         if command.startswith(pf):
             if timer_tasks.get(parent.id):
