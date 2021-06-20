@@ -182,7 +182,7 @@ async def commands(message,pf):
         p = send_check(channel)
 
     if parent is not None:
-        if command.startswith(pf)
+        if command.startswith(pf):
             if timer_tasks.get(parent.id) is not None:
                 timer_tasks[parent.id].append(message)
                 await send('コマンドを予約しました。')
