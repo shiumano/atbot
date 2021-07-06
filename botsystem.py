@@ -338,6 +338,8 @@ async def commands(message,pf,original=True,**kwargs):
 
     elif command == f'{pf}timer':
         set_time = float(argv[1])
+        if set_time % 1 == 0:
+            set_time = int(set_time)
         if set_time <= 0:
             await send('0以下は指定できません。')
         elif set_time <= 10:
@@ -745,6 +747,16 @@ async def zatzudan(message,pf):
             await message.edit(content=f'Ping : {delta_all[:6]}ms\n'
                                        f'Latency : {latency[:6]}ms')
         ping.pop(message)
+
+async def gchat(message,channels):
+    embed = discord.Embed(description=message.content)
+    embed.set_author(name=mesage.author,
+                     icon_url=message.author.avatar_url)
+    embed.set_footer(f'*Channel*:{message.channel}({message.guild})')
+    if len(message.attachments) > 0:
+        embed.set_image(url=message.attachments[0].url)
+    for channel in channels:
+        await message.channel.send(embed=embed)
 
 print(f'{time.ctime().split(" ")[-2]} 読み込み完了')
 
